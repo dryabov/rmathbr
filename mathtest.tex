@@ -1,0 +1,159 @@
+\documentclass[a4paper]{article}
+
+%\xdef\LastDeclaredEncoding{T2A}
+\usepackage[cp1251]{inputenc}
+\usepackage[T2A]{fontenc}
+\usepackage[russian]{babel}
+%\usepackage{concrete}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsfonts}
+\usepackage{amstext}
+\usepackage{latexsym}
+\usepackage{amsbsy}
+\usepackage{amsthm}
+\usepackage{bm}
+\usepackage{color}
+\DeclareMathOperator{\Sp}{Sp-t:r}
+
+% Проверка совместимости с пакетами:
+
+%\usepackage{setspace}
+%\usepackage{calc}
+%\usepackage{geometry}
+%\usepackage{flafter}
+%\usepackage{float}
+%\usepackage{textcomp}
+%\usepackage{enumerate}
+%\usepackage{verbatim}
+%\usepackage{fancyhdr}
+%\usepackage{array}
+%\usepackage{exscale}
+%\usepackage{eucal}
+%\usepackage{eqlist}
+
+%\usepackage{icomma}
+%\usepackage{euler}
+%\usepackage[icomma]{eulervm}
+
+%\usepackage{lscape}
+%\usepackage{varioref}
+%\usepackage{mathtext}
+%\usepackage{rotating}
+%\usepackage{longtable}
+%\usepackage{hhline}
+%\usepackage{indentfirst}
+%\usepackage{ccaption}
+%\usepackage{lastpage}
+%\usepackage{bibunits}
+\usepackage{url}
+
+%\usepackage{program}
+%\usepackage{mathtools}
+%\usepackage{mathstyle}
+%\usepackage{semantic}
+%\usepackage{dcolumn}
+%\usepackage{camel}
+%\usepackage{hyphenat}
+
+%\def\brokenbin#1{#1}
+%\def\brokenrel#1{#1}
+%\def\nobr{}
+%\usepackage{breqn}
+\usepackage{rmathbr}
+\usepackage[matrix,arrow]{xy}
+
+% Проверка вручную переопределенных индексов
+%\let\subscript=_
+%\catcode`\_\active
+%\def_#1{\ensuremath{\subscript{#1}}}
+
+
+% узкая колонка - для проверки
+\textwidth 5mm
+\sloppy
+
+\begin{document}
+
+\url{http://si_te.ru/}
+
+$x +_{a_b}^{w^z_y} y$
+
+$2+2=$ $x;y$
+
+% Проверка пакета xy
+$\xymatrix@1{A\ar[r]^f&B}$
+\[
+\xymatrix{a \ar[r]^{x^2} & b}
+\]
+
+%\def\cdot{\mathbin\mathchar"2201\hskip -7pt\discretionary{\thinspace\the\textfont2\char2}
+%                     {\the\textfont2\char2\thinspace}{}\hskip 7pt}
+${x\cdot y}$ $x\cdot y$
+
+% Проверка оглавлений
+\tableofcontents
+
+%\noindent H_2O C_{60}
+
+\def\tildeto{\leavevmode\vcenter{\baselineskip0pt\lineskip-.25ex\ialign{$##$\crcr\hidewidth\sim\hidewidth\crcr\to\crcr}}}
+
+\noindent $\sin x-y$ $x+\ldots+y$ $T^*X$
+$\chi:\varOmega_X\brokenrel\tildeto\varOmega_Y$
+$D^b(X;\varOmega_X)\tildeto D^b(Y;\varOmega_Y)$
+$T^*_MX\cap\varOmega_X$
+$x=\begin{array}{cc}-x&-x\\-x&-x\end{array}$
+$x\overset{a}{\rightarrow}y$ $\bigcup\sb{i=1}\sp 5 K\sb{n\sb
+i}$
+
+
+\section{$\to\infty\ldots 12_3^4, x:=y, y=z$}
+
+% Проверка пакета icomma
+\noindent $1,23$ $1,x3$ $1, 23$
+
+% Проверка пакета xy
+%$\xymatrix@1{A\ar[r]^f&B}$
+%\[
+%\xymatrix{a \ar[r]^{x^2} & b}
+%\]
+
+% Проверка, что все в порядке внутри display math и работы с пакетом bm
+\begin{equation}
+\hm{X_\star}=x+y
+\end{equation}
+\noindent $\hm{X_\star}$ $q=\hm{\frac{\pi}{3}}$
+
+% Проверка команд, созданных через \DeclareMathOperator
+\noindent $\Sp X_\star$
+
+% Разные проверки
+\noindent $a-(b+c)\leqslant d+(-e)$ $x-y$ $+$ $x\*y$ $x{\*}y$
+$x*y$ $x=1$ $x\equiv 1$ $x\notin 1$ $x>1$ $(-1)$ $-1$ $x.-y$
+$x;-y$ $x,-y$ $x/y$ $x.y$ $x,y$ $x:=y$ $x{:}=y$ $x{:=}y$ $x:y$
+$x:$ $x:y:+z$ $x\colon y$ $x\leadsto y$ $x\restriction y$
+$x+_{a_b}^{w^z_y} y$$x\bigoplus_i^j y$ $z=\left<-x+y\right>$
+$z=<-x+y>$ $x:=\relax_1^2y$ $x:_1^2y$ $x\gg y$, $x\exists y$,
+$x\bigl(y$ $x\bigm(y$ $x\bigr)y$ $x\langle y{\rangle}$
+$x+^1y-z$ $\sin\frac12$ $x+\cdots+y$ $x^\bgroup y\egroup$
+$x+^\leq y$ $x+^*y$ $R^+$ $\ldots_a$ $x\neq y$
+$\langle-1\rangle$ $N\to\infty$ $x\rightleftharpoons y$ $x\cong
+y$ $x\notin y$ $x\bowtie y$ $x\doteq y$ $x+_{a_b}^{w^z_y} y$
+$x+{}_{a_b}^{w^z_y} y$ $x=_{a_b}^{w^z_y} y$ $x={}_{a_b}^{w^z_y}
+y$ $x\ldots_{a_b}^{w^z_y}y$ $x\ldots{}_{a_b}^{w^z_y} y$
+$T+_{\omega_b}G$ $^\circ$ $\int\limits_a^b xdx$
+$\int\nolimits_a^b xdx$ $x+^w y$ $x +_a y$ $\beta>0$ $\{-x+y\}$
+$x\cdot y$ $\left(x+y\right\}$ $(x+y\}$ $x\cong y$ $x\in X$
+$x\times x$ $x\subset x$ $x\sim x$ $x\to x$ $\ge n$ $x=-y$
+$\{-x+\frac12\}$ $[-x+\frac12]$ $(-x+\frac12)$
+
+% Проверка \not
+\noindent $x\models y$ $x\not\models y$ $x\not=y$
+
+% Проверка \nobr
+\noindent $\sum\limits_i^j\nobr-x_i$ $x\nobr\times y$ $x\nobr\bowtie y$
+
+% Проверка \scriptstyle
+\noindent $\scriptstyle x\times y$ $\scriptstyle x+1$ $\scriptstyle x\cong y$
+
+\end{document}

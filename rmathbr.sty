@@ -1,0 +1,1694 @@
+% ================================================================
+% Repeating of math hyphenation mark in inline equations
+% (C) 2009-2010 Denis Ryabov.
+%
+% Based on ideas and code from M.I.Grinchuk "TeX and Russian
+%                 Traditions of Typesetting", TUGboat 17 (1996) 4.
+%
+% CHANGELOG:
+% -------------------- 0.99 [**-*******-201*] --------------------
+% [#] don't hyphenate trailing mathsign (e.g. in $2+2=$)
+% [#] don't change redefined symbols (\le, \ge, \to, etc.)
+% -------------------- 0.98 [31-January-2010] --------------------
+% [+] hyphenation on :=
+% [+] correct work with 'icomma' package and option 'icomma' of
+%     'eulervm' package
+% [+] correct work with 'program' package
+% [+] symbols have been added from  boisik, euler, fourier,
+%     lucbmath, lucidabr, lucmin, lucmtime, luctime, mathbbol,
+%     mdwmath, sbbm, stmaryrd and wasysym packages.
+% [-] remove shrinking of space in math (breaked url package)
+% [#] don't hyphenate after punctuation (',', ';', '\colon' etc.)
+% [#] create broken commands as robust
+% [#] some fixes of redeclaring of AMS commands
+% [#] commented hyphenation on \ldots и \cdots, as TeX doesn't
+%     here by default
+% -------------------- 0.97 [08-October-2009] --------------------
+% [#] problem with operators like '+^\leq'
+% -------------------- 0.96 [29-September-2009] ------------------
+% [#] problem with '-' in AMS \DeclareMathOperator
+% [#] problem with \ldots in text mode
+% -------------------- 0.95 [28-September-2009] ------------------
+% [#] problem with sub/sup-scripts after relations
+% [+] hyphenation on \ldots
+% [+] AMS/Lucida left brackets (lvert, lVert, ulcorner, llcorner)
+%     support
+% [+] mathbbol.sty left bracket (Lbrack) support
+% [^] huge code refactoring
+% -------------------- 0.91 [21-September-2009] ------------------
+% [#] problem with space after brackets
+% -------------------- 0.90 [20-September-2009] ------------------
+% [!] first public release
+%
+%
+% KNOWN ISSUES:
+% expressions like $\sum -y$ require manual insertion of \nobr
+% before - (that is $\sum \nobr-y$)
+% expressions like $x+\ldots+y$ may be broken on pluses
+% 'xy' package: should be loaded after 'rmathbr' to work properly
+% 'breqn' package: cannot work together with 'rmathbr'
+% ================================================================
+%
+% ѕеренос строчных формул в русском стиле (с дублированием знаков)
+% (C) 2009-2010 ƒенис –€бов.
+%
+% ќсновано на иде€х и коде из M.I.Grinchuk "TeX and Russian
+%                 Traditions of Typesetting", TUGboat 17 (1996) 4.
+%
+% »«ћ≈Ќ≈Ќ»я:
+% -------------------- 0.99 [** ******* 2010] --------------------
+% [#] не переносить сто€щий в конце формулы знак операции
+%     (как, например, в $2+2=$)
+% [#] не мен€ть переопределенные символы (\le, \ge, \to и др.)
+% -------------------- 0.98 [31 €нвар€ 2010] ---------------------
+% [+] перенос на :=
+% [+] корректна€ работа с опцией icomma пакета eulervm и пакетом
+%     icomma
+% [+] корректна€ работа с пакетом program
+% [+] добавлены символы из пакетов boisik, euler, fourier,
+%     lucbmath, lucidabr, lucmin, lucmtime, luctime, mathbbol,
+%     mdwmath, sbbm, stmaryrd и wasysym
+% [-] убрано уменьшение пробелов в математических формулах
+%     (нарушало работу пакета url)
+% [#] не делать переносы после знаков пунктуации , ; \colon и др.
+% [#] переносимые команды создаютс€ как крепкие
+% [#] исправлено объ€вление некоторых AMS-команд
+% [#] перенос на \ldots и \cdots закомментирован, т.к. TeX на них
+%     по-умолчанию не переносит
+% -------------------- 0.97 [08 окт€бр€ 2009] --------------------
+% [#] решена проблема с операторами типа '+^\leq'
+% -------------------- 0.96 [29 сент€бр€ 2009] -------------------
+% [#] решена проблема с '-' в AMS \DeclareMathOperator
+% [#] решена проблема с \ldots в текстовой моде
+% -------------------- 0.95 [28 сент€бр€ 2009] -------------------
+% [#] решена проблема с над- и подстрочными индексами после знаков
+% [+] перенос на \ldots
+% [+] учитываютс€ открывающие скобки из AMS/Lucida (lvert, lVert,
+%     ulcorner, llcorner)
+% [+] учитываютс€ открывающие скобки из mathbbol.sty (Lbrack)
+% [^] код пакета в значительной степени переработан
+% -------------------- 0.91 [21 сент€бр€ 2009] -------------------
+% [#] решена проблема с отступами после скобок
+% -------------------- 0.90 [20 сент€бр€ 2009] -------------------
+% [!] перва€ публична€ верси€
+%
+%
+% »«¬≈—“Ќџ≈ ѕ–ќЅЋ≈ћџ:
+% в выражени€х типа $\sum -y$ нужно вручную вставл€ть \nobr
+% перед - (то есть писать $\sum \nobr-y$)
+% в выражени€х типа $x+\ldots+y$ разрешены переносы на +
+% пакет xy: дл€ корректной работы должен загружать после rmathbr
+% пакет breqn: не может работать совместно с rmathbr
+% ================================================================
+\NeedsTeXFormat{LaTeX2e}%
+\ProvidesPackage{rmathbr}[2010/11/15 v0.99]
+
+%\@ifpackageloaded{breqn}%
+%{
+%  \PackageError{rmathbr}{'rmathbr' package cannot be used together with 'breqn' package!}{}%
+%}{}
+\@ifpackageloaded{xy}%
+{
+  \PackageError{rmathbr}{'rmathbr' package should be loaded before 'xy' package!}{}%
+}{}
+
+
+% INTERFACE
+
+% makes next symbol nonbreakable
+\def\nobr{\penalty\relpenalty}
+
+% makes breakable binary operation
+\def\SetBreakableBin#1{\rmathbr@setbreakable{#1}{\brokenbin}}
+% makes breakable relation sign
+\def\SetBreakableRel#1{\rmathbr@setbreakable{#1}{\brokenrel}}
+% makes breakable inner (like \ldots)
+\def\SetBreakableInner#1{\rmathbr@setbreakable{#1}{\brokeninner}}
+% disables breaks after open bracket
+\def\SetOpenBracket#1{\rmathbr@nobrafter{#1}}
+% disables breaks after punctuation sign
+\def\SetPunctuation#1{\rmathbr@nobrafter{#1}}
+
+% makes argument as breakable binary operation
+\DeclareRobustCommand{\brokenbin}[1]{\rmathbr@brokenbin{#1}}
+% makes argument as breakable relation sign
+\DeclareRobustCommand{\brokenrel}[1]{\rmathbr@brokenrel{#1}}
+% makes argument as breakable inner
+\DeclareRobustCommand{\brokeninner}[1]{\rmathbr@brokeninner{#1}}
+
+
+% IMPLEMENTATION
+
+% save default penalty to \exhyphenpenalty
+% (as \exhyphenpenalty will be actual penalty for mathbreaks)
+\exhyphenpenalty=\relpenalty
+
+% disable default breaks
+\relpenalty=13131
+\binoppenalty=14141
+
+% first symbol in equation is nonbreakable
+\expandafter\everymath\expandafter{\the\everymath\nobr }
+
+% setup sub- and superscripts
+\ifnum\catcode`\^=12%
+  \begingroup%
+    \catcode`\^\active
+    \global\let\rmathbr@superscript@text=^%
+  \endgroup%
+\else%
+  \let\rmathbr@superscript@text=^%
+\fi
+\ifnum\catcode`\_=12%
+  \begingroup%
+    \catcode`\_\active
+    \global\let\rmathbr@subscript@text=_%
+  \endgroup%
+\else%
+  \let\rmathbr@subscript@text=_%
+\fi
+\def\rmathbr@superscript#1{\rmathbr@superscript@text{{#1}}}
+\def\rmathbr@subscript#1{\rmathbr@subscript@text{{#1}}}
+\begingroup
+  \catcode`\^\active\gdef^{\rmathbr@superscript}
+  \catcode`\_\active\gdef_{\rmathbr@subscript}
+\endgroup
+
+%save existing commands
+\begingroup\catcode`\_=13\catcode`\^=13\lowercase{\endgroup
+\AtBeginDocument%
+{%
+  \ifnum\catcode`\^=13
+    \let\rmathbr@superscript@text@active=^
+    \DeclareRobustCommand{\rmathbrsuperscript}[1]{\rmathbr@superscript@text@active{{#1}}}
+  \else
+    \DeclareRobustCommand{\rmathbrsuperscript}[1]{\rmathbr@superscript@text{{#1}}}
+  \fi
+  \def^{\rmathbrsuperscript}
+  \def\rmathbr@superscript@macro{\rmathbrsuperscript}
+  \ifnum\catcode`\_=13
+    \let\rmathbr@subscript@text@active=_
+    \DeclareRobustCommand{\rmathbrsubscript}[1]{\rmathbr@subscript@text@active{{#1}}}
+  \else
+    \DeclareRobustCommand{\rmathbrsubscript}[1]{\rmathbr@subscript@text{{#1}}}
+  \fi
+  \def_{\rmathbrsubscript}
+  \def\rmathbr@subscript@macro{\rmathbrsubscript}
+}}
+
+%process options
+\DeclareOption{mathactivechars}%
+{
+  \catcode`\^=12\catcode`\_=12
+}
+\DeclareOption{activechars}%
+{
+  \catcode`\^\active\catcode`\_\active
+}
+\DeclareOption{noactivechars}%
+{
+  \catcode`\^=7\catcode`\_=8
+}
+\ExecuteOptions{mathactivechars}%
+\ProcessOptions
+
+%basic math
+\begingroup
+  \catcode`\=\active
+  \ifnum\mathcode`\=<32768
+    \xdef={\noexpand\brokenbin{\mathchar\number\mathcode`\=}}
+  \else
+    \gdef={\brokenbin{\mathchar12349}}
+  \fi
+\endgroup
+
+\begingroup
+  \catcode`\+\active
+  \ifnum\mathcode`\+<32768
+    \xdef+{\noexpand\brokenbin{\mathchar\number\mathcode`\+}}
+  \else
+    \gdef+{\brokenbin{\mathchar8235}}
+  \fi
+\endgroup
+
+\begingroup
+  \catcode`\-\active
+  \ifnum\mathcode`\-<32768
+    \xdef-{\noexpand\brokenbin{\mathchar\number\mathcode`\-}}
+  \else
+    \gdef-{\brokenbin{\mathchar8704}}
+  \fi
+\endgroup
+
+\begingroup
+  \catcode`\*\active
+  \ifnum\mathcode`\*<32768
+    \xdef*{\noexpand\brokenbin{\mathchar\number\mathcode`\*}}
+  \else
+    \gdef*{\brokenbin{\mathchar8707}}
+  \fi
+\endgroup
+
+\begingroup
+  \ifnum\mathcode`\<<32768
+    \catcode`\<\active
+    \xdef<{\noexpand\brokenbin{\mathchar\number\mathcode`\<}}
+  \else
+    \catcode`\<\active
+    \gdef<{\brokenbin{\mathchar12604}}
+  \fi
+\endgroup
+
+\begingroup
+  \catcode`\>\active
+  \ifnum\mathcode`\><32768
+    \xdef>{\noexpand\brokenbin{\mathchar\number\mathcode`\>}}
+  \else
+    \gdef>{\brokenbin{\mathchar12606}}
+  \fi
+\endgroup
+
+\begingroup
+  \catcode`\(\active
+  \xdef({\mathopen\delimiter\number\delcode`\(\noexpand\nobr }
+\endgroup
+
+\begingroup
+  \catcode`\[\active
+  \xdef[{\mathopen\delimiter\number\delcode`\[\noexpand\nobr }
+\endgroup
+
+\AtBeginDocument%
+{
+  \mathcode`\==32768% "8000
+  \mathcode`\<=32768
+  \mathcode`\>=32768
+  \mathcode`\+=32768
+  \mathcode`\-=32768
+  \mathcode`\*=32768
+  \mathcode`\_=32768
+  \mathcode`\^=32768
+  \mathcode`\(=32768
+  \mathcode`\[=32768
+  \mathcode`\:=32768
+  \mathcode`\,=32768
+  \mathcode`\;=32768
+  \let\rmathbr@orig@resetMathstrut=\resetMathstrut@
+  \begingroup
+    \gdef\resetMathstrut@
+    {
+      \mathcode`\(=16424% "4028
+      \rmathbr@orig@resetMathstrut
+      \mathcode`\(=32768% "8000
+    }
+    \gdef\newmcodes@
+    {
+      \mathcode`\'=39
+      \mathcode`\*=42
+      \mathcode`\.=24890% "613A
+      \mathcode`\-=45
+      \mathcode`\/=47
+      \mathcode`\:=24634% "603A
+      \relax
+    }
+  \endgroup%
+}
+
+\begingroup
+  \catcode`\:\active \gdef:{\futurelet\rmathbr@let@token\rmathbr@colontest}
+\endgroup
+\def\rmathbr@colontest% check for :=
+{
+  \ifx=\rmathbr@let@token
+    \expandafter\rmathbr@letsign
+  \else
+    \expandafter\rmathbr@colon
+  \fi
+}%
+
+\ifnum\mathcode`\:<32768
+  \edef\rmathbr@letsign#1{\noexpand\brokenrel{\mathchar\number\mathcode`\:\mathchar\number\mathcode`\=}}
+  \edef\rmathbr@colon{\noexpand\brokenrel{\mathchar\number\mathcode`\:}}
+\else
+  \def\rmathbr@letsign#1{\brokenrel{\mathchar12346\mathchar12349}}
+  \def\rmathbr@colon{\brokenrel{\mathchar12346}}
+\fi
+
+\begingroup
+  \catcode`\,\active
+  \@ifpackageloaded{icomma}% check for 'icomma' package
+  {
+    \expandafter\gdef\expandafter\sm@rtcomma\expandafter{\sm@rtcomma\nobr}
+  }{
+    \ifx\domathcomma\undefined% check for 'eulervm' package with 'icomma' option
+      \ifnum\mathcode`\,<32768
+        \xdef,{\mathpunct\mathchar\number\mathcode`\,\noexpand\nobr }
+      \else
+        \gdef,{\mathpunct\mathchar24891\nobr }
+      \fi
+    \else
+      \expandafter\gdef\expandafter\domathcomma\expandafter{\domathcomma\nobr}
+    \fi
+  }
+\endgroup
+
+\begingroup
+  \catcode`\;\active
+  \@ifpackageloaded{program}% check for 'program' package
+  {
+    \gdef;{\ifmmode\semicolon\;\nobr\else\@semicolon\fi}
+  }{
+    \ifnum\mathcode`\;<32768
+      \xdef;{\mathpunct\mathchar\number\mathcode`\;\noexpand\nobr }
+    \else
+      \gdef;{\mathpunct\mathchar24635\nobr }
+    \fi
+  }
+\endgroup
+
+\def\rmathbr@ReDeclareRobustCommand#1#2% Command without arguments
+{
+  \begingroup
+    \ifx#1\undefined
+    \else
+      \edef\var@orig@I{rmathbr@orig@\expandafter\@gobble\string#1}
+      \edef\var@Ispace{\expandafter\@gobble\string#1 }
+      \expandafter\ifx\csname\var@orig@I\endcsname\relax
+        \expandafter\ifx\csname\var@Ispace\endcsname\relax
+          \global\expandafter\let\csname\var@orig@I\endcsname#1
+        \else
+          \global\expandafter\let\csname\var@orig@I\expandafter\endcsname\csname\var@Ispace\endcsname
+        \fi
+      \fi
+      \expandafter\gdef\csname\var@Ispace\endcsname{#2}% no arguments
+      \xdef#1{\noexpand\protect\expandafter\noexpand\csname\var@Ispace\endcsname}
+    \fi
+  \endgroup%
+}
+\def\rmathbr@ReDeclareRobustCommandI#1#2% Command with one argument
+{
+  \begingroup
+    \ifx#1\undefined
+    \else
+      \edef\var@orig@I{rmathbr@orig@\expandafter\@gobble\string#1}
+      \edef\var@Ispace{\expandafter\@gobble\string#1 }
+      \expandafter\ifx\csname\var@orig@I\endcsname\relax
+        \expandafter\ifx\csname\var@Ispace\endcsname\relax
+          \global\expandafter\let\csname\var@orig@I\endcsname#1
+        \else
+          \global\expandafter\let\csname\var@orig@I\expandafter\endcsname\csname\var@Ispace\endcsname
+        \fi
+      \fi
+      \expandafter\gdef\csname\var@Ispace\endcsname##1{#2}% one argument
+      \xdef#1{\noexpand\protect\expandafter\noexpand\csname\var@Ispace\endcsname}
+    \fi
+  \endgroup%
+}
+
+\def\rmathbr@setbrokens%
+{
+  \rmathbr@ReDeclareRobustCommandI{\brokenbin}{\rmathbr@brokenbin{##1}}
+  \rmathbr@ReDeclareRobustCommandI{\brokenrel}{\rmathbr@brokenrel{##1}}
+  \rmathbr@ReDeclareRobustCommandI{\brokeninner}{\rmathbr@brokeninner{##1}}%
+}
+\def\rmathbr@unsetbrokens%
+{
+  \def\brokenbin##1{##1}
+  \def\brokenrel##1{##1}
+  \def\brokeninner##1{##1}%
+}
+
+\def\rmathbr@brokenbin#1%
+{
+  \relax
+  \def\rmathbr@arg{#1}
+  \def\rmathbr@this{\rmathbr@brokenbin}
+  \def\rmathbr@output{\rmathbr@@brokenbin}
+  \futurelet\rmathbr@let@token\rmathbr@brokenop%
+}
+\def\rmathbr@brokenrel#1%
+{
+  \relax
+  \def\rmathbr@arg{#1}
+  \def\rmathbr@this{\rmathbr@brokenrel}
+  \def\rmathbr@output{\rmathbr@@brokenrel}
+  \futurelet\rmathbr@let@token\rmathbr@brokenop%
+}
+\def\rmathbr@brokeninner#1%
+{
+  \relax
+  \def\rmathbr@arg{#1}
+  \def\rmathbr@this{\rmathbr@brokeninner}
+  \def\rmathbr@output{\rmathbr@@brokeninner}
+  \futurelet\rmathbr@let@token\rmathbr@brokenop%
+}
+
+\def\rmathbr@@brokenbin#1%
+{
+  \ifnum\lastpenalty=\relpenalty
+    \mathbin{#1}
+  \else
+    \mathbin{#1}
+    \ifx$\rmathbr@let@token
+    \else
+      \rmathbr@selector{#1}
+    \fi
+  \fi
+  \rmathbr@setbrokens
+  \penalty\binoppenalty %
+}
+\def\rmathbr@@brokenrel#1%
+{
+  \ifnum\lastpenalty=\relpenalty
+    \mathrel{#1}
+  \else
+    \mathrel{#1}
+    \ifx$\rmathbr@let@token
+    \else
+      \rmathbr@selector{#1}
+    \fi
+  \fi
+  \rmathbr@setbrokens
+  \penalty\relpenalty %
+}
+\def\rmathbr@@brokeninner#1%
+{
+  \ifnum\lastpenalty=\relpenalty
+    \mathinner{#1}
+  \else
+    \mathinner{#1}
+    \ifx$\rmathbr@let@token
+    \else
+      \rmathbr@selector{#1}
+    \fi
+  \fi
+  \rmathbr@setbrokens
+  \penalty\relpenalty %
+}
+
+\def\rmathbr@selector#1%
+{
+  \mathchoice
+    {\discretionary{}{\hbox{$\m@th\displaystyle#1$}}{}}
+    {\discretionary{}{\hbox{$\m@th\textstyle#1$}}{}}
+    {\discretionary{}{\hbox{$\m@th\scriptstyle#1$}}{}}
+    {\discretionary{}{\hbox{$\m@th\scriptscriptstyle#1$}}{}}%
+}
+\begingroup\catcode`\_=12\catcode`\^=12
+\gdef\rmathbr@brokenop%
+{
+  \ifmmode
+    \rmathbr@unsetbrokens
+    \ifx\rmathbr@subscript@macro\rmathbr@let@token
+      \let\@command=\rmathbr@brokenglue
+    \else\ifx_\rmathbr@let@token
+      \let\@command=\rmathbr@brokenglue
+    \else\ifx\rmathbr@superscript@macro\rmathbr@let@token
+      \let\@command=\rmathbr@brokenglue
+    \else\ifx^\rmathbr@let@token
+      \let\@command=\rmathbr@brokenglue
+    \else\ifx\relax\rmathbr@let@token
+      \let\@command=\rmathbr@brokenskiprelax
+    \else
+      \let\@command=\rmathbr@output
+    \fi\fi\fi\fi\fi
+  \else
+    \let\@command=\relax
+  \fi
+  \expandafter\@command{\rmathbr@arg}%
+}
+\endgroup
+\def\rmathbr@brokenglue#1#2#3%
+{
+  \edef\rmathbr@temp{#1#2{#3}}
+  \expandafter\rmathbr@this{\rmathbr@temp}%
+}
+\def\rmathbr@brokenskiprelax#1#2%
+{
+  \edef\rmathbr@temp{#1#2}
+  \expandafter\rmathbr@this{\rmathbr@temp}%
+}
+
+\def\rmathbr@setbreakable#1#2%
+{
+  \begingroup
+    \ifx#1\undefined
+    \else
+      \edef\rmathbr@orig{rmathbr@orig@\expandafter\@gobble\string#1}
+      \expandafter\ifx\csname\rmathbr@orig\endcsname\relax
+        \expandafter\rmathbr@ReDeclareRobustCommand\expandafter#1\expandafter{\expandafter#2\expandafter{\csname\rmathbr@orig\endcsname}}
+      \fi
+    \fi
+  \endgroup%
+}
+
+\def\rmathbr@nobrafter#1%
+{
+  \begingroup
+    \ifx#1\undefined
+    \else
+      \edef\rmathbr@orig{rmathbr@orig@\expandafter\@gobble\string#1}
+      \expandafter\ifx\csname\rmathbr@orig\endcsname\relax
+        \expandafter\rmathbr@ReDeclareRobustCommand\expandafter#1\expandafter{\csname\rmathbr@orig\endcsname\nobr}
+      \fi
+    \fi
+  \endgroup%
+}
+
+% REDECLARATION OF MATH SIGNS
+
+% redeclare \not
+\rmathbr@ReDeclareRobustCommandI{\not}%
+{
+  \begingroup
+    \edef\rmathbr@orig{rmathbr@orig@\expandafter\@gobble\string#1}
+    \expandafter\ifx\csname\rmathbr@orig\endcsname\relax
+      \brokenrel{\rmathbr@orig@not#1}
+    \else
+      \expandafter\brokenrel\expandafter{\expandafter\rmathbr@orig@not\csname\rmathbr@orig\endcsname}
+    \fi
+  \endgroup%
+}
+
+% Open brackets
+\rmathbr@ReDeclareRobustCommandI{\bigl}{\mathopen\big#1\nobr}
+\rmathbr@ReDeclareRobustCommandI{\Bigl}{\mathopen\Big#1\nobr}
+\rmathbr@ReDeclareRobustCommandI{\biggl}{\mathopen\bigg#1\nobr}
+\rmathbr@ReDeclareRobustCommandI{\Biggl}{\mathopen\Bigg#1\nobr}
+
+\SetOpenBracket{\lmoustache}
+\SetOpenBracket{\langle}
+\SetOpenBracket{\lbrace}
+\SetOpenBracket{\lceil}
+\SetOpenBracket{\lfloor}
+\SetOpenBracket{\lgroup}
+\SetOpenBracket{\lvert}
+\SetOpenBracket{\lVert}
+\SetOpenBracket{\ulcorner}
+\SetOpenBracket{\llcorner}
+\SetOpenBracket{\Lbrack}
+
+% Punctuations
+\SetPunctuation{\ldotp}
+\SetPunctuation{\cdotp}
+\SetPunctuation{\colon}
+\SetPunctuation{\period}
+
+% Inners - uncomment if you like to make it breakable
+%\SetBreakableInner{\ldots}
+%\SetBreakableInner{\cdots}
+
+% Binary Operations
+\SetBreakableBin{\triangleleft}
+\SetBreakableBin{\triangleright}
+\SetBreakableBin{\bigtriangleup}
+\SetBreakableBin{\bigtriangledown}
+\SetBreakableBin{\wedge} \SetBreakableBin{\land} %\let\land=\wedge
+\SetBreakableBin{\vee}   \SetBreakableBin{\lor}  %\let\lor=\vee
+\SetBreakableBin{\cap}
+\SetBreakableBin{\cup}
+\SetBreakableBin{\ddagger}
+\SetBreakableBin{\dagger}
+\SetBreakableBin{\sqcap}
+\SetBreakableBin{\sqcup}
+\SetBreakableBin{\uplus}
+\SetBreakableBin{\amalg}
+\SetBreakableBin{\diamond}
+\SetBreakableBin{\bullet}
+\SetBreakableBin{\wr}
+\SetBreakableBin{\div}
+\SetBreakableBin{\odot}
+\SetBreakableBin{\oslash}
+\SetBreakableBin{\otimes}
+\SetBreakableBin{\ominus}
+\SetBreakableBin{\oplus}
+\SetBreakableBin{\mp}
+\SetBreakableBin{\pm}
+\SetBreakableBin{\circ}
+\SetBreakableBin{\bigcirc}
+\SetBreakableBin{\setminus}
+\SetBreakableBin{\ast}
+\SetBreakableBin{\star}
+\SetBreakableBin{\times}
+%\SetBreakableBin{\cdot} % TODO (if possible - it should be changed to \times on hyphenation)
+\def\*{\discretionary{\thinspace\the\textfont2\char2}
+                     {\the\textfont2\char2\thinspace}{}}
+
+% Relations
+\SetBreakableRel{\propto}
+\SetBreakableRel{\sqsubseteq}
+\SetBreakableRel{\sqsupseteq}
+\SetBreakableRel{\parallel}
+\SetBreakableRel{\mid}
+\SetBreakableRel{\dashv}
+\SetBreakableRel{\vdash}
+\SetBreakableRel{\leq} \SetBreakableRel{\le} %\let\le=\leq
+\SetBreakableRel{\geq} \SetBreakableRel{\ge} %\let\ge=\geq
+\SetBreakableRel{\succ}
+\SetBreakableRel{\prec}
+\SetBreakableRel{\approx}
+\SetBreakableRel{\succeq}
+\SetBreakableRel{\preceq}
+\SetBreakableRel{\supset}
+\SetBreakableRel{\subset}
+\SetBreakableRel{\supseteq}
+\SetBreakableRel{\subseteq}
+\SetBreakableRel{\in}
+\SetBreakableRel{\ni} \SetBreakableRel{\owns} %\let\owns=\ni
+\SetBreakableRel{\gg}
+\SetBreakableRel{\ll}
+\SetBreakableRel{\sim}
+\SetBreakableRel{\simeq}
+\SetBreakableRel{\perp}
+\SetBreakableRel{\equiv}
+\SetBreakableRel{\asymp}
+\SetBreakableRel{\smile}
+\SetBreakableRel{\frown}
+\SetBreakableRel{\models}
+\SetBreakableRel{\cong}
+\SetBreakableRel{\notin}
+\SetBreakableRel{\doteq}
+\SetBreakableRel{\bowtie}
+\SetBreakableRel{\neq} % Works well without \SetBreakableRel
+\SetBreakableRel{\ne}  % Works well without \SetBreakableRel
+
+% Arrows
+\SetBreakableRel{\nearrow}
+\SetBreakableRel{\searrow}
+\SetBreakableRel{\nwarrow}
+\SetBreakableRel{\swarrow}
+\SetBreakableRel{\Leftrightarrow}
+\SetBreakableRel{\Leftarrow}
+\SetBreakableRel{\Rightarrow}
+\SetBreakableRel{\leftrightarrow}
+\SetBreakableRel{\leftarrow}  \SetBreakableRel{\gets}  %\let\gets=\leftarrow
+\SetBreakableRel{\rightarrow} \SetBreakableRel{\to} %\let\to=\rightarrow
+\SetBreakableRel{\leftharpoonup}
+\SetBreakableRel{\leftharpoondown}
+\SetBreakableRel{\rightharpoonup}
+\SetBreakableRel{\rightharpoondown}
+\SetBreakableRel{\longleftarrow}
+\SetBreakableRel{\Longleftarrow}
+\SetBreakableRel{\longrightarrow}
+\SetBreakableRel{\Longrightarrow}
+\SetBreakableRel{\longleftrightarrow}
+\SetBreakableRel{\Longleftrightarrow}
+%\mapstochar - unlikely used as relation symbol by itself (without \joinrel to smth.)
+\SetBreakableRel{\mapsto}
+\SetBreakableRel{\longmapsto}
+%\lhook - unlikely used as relation symbol by itself (without \joinrel to smth.)
+%\rhook - unlikely used as relation symbol by itself (without \joinrel to smth.)
+\SetBreakableRel{\hookleftarrow}
+\SetBreakableRel{\hookrightarrow}
+\SetBreakableRel{\rightleftharpoons}
+
+%From latexsym
+\SetBreakableBin{\lhd}
+\SetBreakableBin{\unlhd}
+\SetBreakableBin{\rhd}
+\SetBreakableBin{\unrhd}
+\SetBreakableRel{\Join}
+\SetBreakableRel{\leadsto}
+\SetBreakableRel{\sqsubset}
+\SetBreakableRel{\sqsupset}
+
+\@ifpackageloaded{amsfonts}% amsfonts
+{
+  \SetBreakableRel{\dashrightarrow} \SetBreakableRel{\dasharrow} %\global\let\dasharrow\dashrightarrow
+  \SetBreakableRel{\dashleftarrow}
+  \SetBreakableRel{\vartriangleright}
+  \SetBreakableRel{\vartriangleleft}
+  \SetBreakableRel{\trianglerighteq}
+  \SetBreakableRel{\trianglelefteq}
+  \SetBreakableRel{\rightsquigarrow} \SetBreakableRel{\leadsto} %\global\let\leadsto\rightsquigarrow
+}{}
+
+\@ifpackageloaded{amssymb}% amssymb
+{
+  \SetBreakableBin{\boxdot}
+  \SetBreakableBin{\boxplus}
+  \SetBreakableBin{\boxtimes}
+  \SetBreakableBin{\centerdot}
+  \SetBreakableBin{\boxminus}
+  \SetBreakableBin{\veebar}
+  \SetBreakableBin{\barwedge}
+  \SetBreakableBin{\doublebarwedge}
+  \SetBreakableBin{\Cup} \SetBreakableBin{\doublecup} %\global\let\doublecup\Cup
+  \SetBreakableBin{\Cap} \SetBreakableBin{\doublecap} %\global\let\doublecap\Cap
+  \SetBreakableBin{\curlywedge}
+  \SetBreakableBin{\curlyvee}
+  \SetBreakableBin{\leftthreetimes}
+  \SetBreakableBin{\rightthreetimes}
+  \SetBreakableBin{\dotplus}
+  \SetBreakableBin{\intercal}
+  \SetBreakableBin{\circledcirc}
+  \SetBreakableBin{\circledast}
+  \SetBreakableBin{\circleddash}
+  \SetBreakableBin{\divideontimes}
+  \SetBreakableBin{\lessdot}
+  \SetBreakableBin{\gtrdot}
+  \SetBreakableBin{\ltimes}
+  \SetBreakableBin{\rtimes}
+  \SetBreakableBin{\smallsetminus}
+  \SetBreakableRel{\circlearrowright}
+  \SetBreakableRel{\circlearrowleft}
+  \SetBreakableRel{\leftrightharpoons}
+  \SetBreakableRel{\Vdash}
+  \SetBreakableRel{\Vvdash}
+  \SetBreakableRel{\vDash}
+  \SetBreakableRel{\twoheadrightarrow}
+  \SetBreakableRel{\twoheadleftarrow}
+  \SetBreakableRel{\leftleftarrows}
+  \SetBreakableRel{\rightrightarrows}
+  \SetBreakableRel{\upuparrows}
+  \SetBreakableRel{\downdownarrows}
+  \SetBreakableRel{\upharpoonright} \SetBreakableRel{\restriction} %\global\let\restriction\upharpoonright
+  \SetBreakableRel{\downharpoonright}
+  \SetBreakableRel{\upharpoonleft}
+  \SetBreakableRel{\downharpoonleft}
+  \SetBreakableRel{\rightarrowtail}
+  \SetBreakableRel{\leftarrowtail}
+  \SetBreakableRel{\leftrightarrows}
+  \SetBreakableRel{\rightleftarrows}
+  \SetBreakableRel{\Lsh}
+  \SetBreakableRel{\Rsh}
+  \SetBreakableRel{\rightsquigarrow}
+  \SetBreakableRel{\leftrightsquigarrow}
+  \SetBreakableRel{\looparrowleft}
+  \SetBreakableRel{\looparrowright}
+  \SetBreakableRel{\circeq}
+  \SetBreakableRel{\succsim}
+  \SetBreakableRel{\gtrsim}
+  \SetBreakableRel{\gtrapprox}
+  \SetBreakableRel{\multimap}
+  \SetBreakableRel{\therefore}
+  \SetBreakableRel{\because}
+  \SetBreakableRel{\doteqdot} \SetBreakableRel{\Doteq} %\global\let\Doteq\doteqdot
+  \SetBreakableRel{\triangleq}
+  \SetBreakableRel{\precsim}
+  \SetBreakableRel{\lesssim}
+  \SetBreakableRel{\lessapprox}
+  \SetBreakableRel{\eqslantless}
+  \SetBreakableRel{\eqslantgtr}
+  \SetBreakableRel{\curlyeqprec}
+  \SetBreakableRel{\curlyeqsucc}
+  \SetBreakableRel{\preccurlyeq}
+  \SetBreakableRel{\leqq}
+  \SetBreakableRel{\leqslant}
+  \SetBreakableRel{\lessgtr}
+  \SetBreakableRel{\risingdotseq}
+  \SetBreakableRel{\fallingdotseq}
+  \SetBreakableRel{\succcurlyeq}
+  \SetBreakableRel{\geqq}
+  \SetBreakableRel{\geqslant}
+  \SetBreakableRel{\gtrless}
+  \SetBreakableRel{\vartriangleright}
+  \SetBreakableRel{\vartriangleleft}
+  \SetBreakableRel{\trianglerighteq}
+  \SetBreakableRel{\trianglelefteq}
+  \SetBreakableRel{\between}
+  \SetBreakableRel{\blacktriangleright}
+  \SetBreakableRel{\blacktriangleleft}
+  \SetBreakableRel{\vartriangle}
+  \SetBreakableRel{\eqcirc}
+  \SetBreakableRel{\lesseqgtr}
+  \SetBreakableRel{\gtreqless}
+  \SetBreakableRel{\lesseqqgtr}
+  \SetBreakableRel{\gtreqqless}
+  \SetBreakableRel{\Rrightarrow}
+  \SetBreakableRel{\Lleftarrow}
+  \SetBreakableRel{\varpropto}
+  \SetBreakableRel{\smallsmile}
+  \SetBreakableRel{\smallfrown}
+  \SetBreakableRel{\Subset}
+  \SetBreakableRel{\Supset}
+  \SetBreakableRel{\subseteqq}
+  \SetBreakableRel{\supseteqq}
+  \SetBreakableRel{\bumpeq}
+  \SetBreakableRel{\Bumpeq}
+  \SetBreakableRel{\lll} \SetBreakableRel{\llless} %\global\let\llless\lll
+  \SetBreakableRel{\ggg} \SetBreakableRel{\gggtr}  %\global\let\gggtr\ggg
+  \SetBreakableRel{\pitchfork}
+  \SetBreakableRel{\backsim}
+  \SetBreakableRel{\backsimeq}
+  \SetBreakableRel{\lvertneqq}
+  \SetBreakableRel{\gvertneqq}
+  \SetBreakableRel{\nleq}
+  \SetBreakableRel{\ngeq}
+  \SetBreakableRel{\nless}
+  \SetBreakableRel{\ngtr}
+  \SetBreakableRel{\nprec}
+  \SetBreakableRel{\nsucc}
+  \SetBreakableRel{\lneqq}
+  \SetBreakableRel{\gneqq}
+  \SetBreakableRel{\nleqslant}
+  \SetBreakableRel{\ngeqslant}
+  \SetBreakableRel{\lneq}
+  \SetBreakableRel{\gneq}
+  \SetBreakableRel{\npreceq}
+  \SetBreakableRel{\nsucceq}
+  \SetBreakableRel{\precnsim}
+  \SetBreakableRel{\succnsim}
+  \SetBreakableRel{\lnsim}
+  \SetBreakableRel{\gnsim}
+  \SetBreakableRel{\nleqq}
+  \SetBreakableRel{\ngeqq}
+  \SetBreakableRel{\precneqq}
+  \SetBreakableRel{\succneqq}
+  \SetBreakableRel{\precnapprox}
+  \SetBreakableRel{\succnapprox}
+  \SetBreakableRel{\lnapprox}
+  \SetBreakableRel{\gnapprox}
+  \SetBreakableRel{\nsim}
+  \SetBreakableRel{\ncong}
+  \SetBreakableRel{\varsubsetneq}
+  \SetBreakableRel{\varsupsetneq}
+  \SetBreakableRel{\nsubseteqq}
+  \SetBreakableRel{\nsupseteqq}
+  \SetBreakableRel{\subsetneqq}
+  \SetBreakableRel{\supsetneqq}
+  \SetBreakableRel{\varsubsetneqq}
+  \SetBreakableRel{\varsupsetneqq}
+  \SetBreakableRel{\subsetneq}
+  \SetBreakableRel{\supsetneq}
+  \SetBreakableRel{\nsubseteq}
+  \SetBreakableRel{\nsupseteq}
+  \SetBreakableRel{\nparallel}
+  \SetBreakableRel{\nmid}
+  \SetBreakableRel{\nshortmid}
+  \SetBreakableRel{\nshortparallel}
+  \SetBreakableRel{\nvdash}
+  \SetBreakableRel{\nVdash}
+  \SetBreakableRel{\nvDash}
+  \SetBreakableRel{\nVDash}
+  \SetBreakableRel{\ntrianglerighteq}
+  \SetBreakableRel{\ntrianglelefteq}
+  \SetBreakableRel{\ntriangleleft}
+  \SetBreakableRel{\ntriangleright}
+  \SetBreakableRel{\nleftarrow}
+  \SetBreakableRel{\nrightarrow}
+  \SetBreakableRel{\nLeftarrow}
+  \SetBreakableRel{\nRightarrow}
+  \SetBreakableRel{\nLeftrightarrow}
+  \SetBreakableRel{\nleftrightarrow}
+  \SetBreakableRel{\eqsim}
+  \SetBreakableRel{\shortmid}
+  \SetBreakableRel{\shortparallel}
+  \SetBreakableRel{\thicksim}
+  \SetBreakableRel{\thickapprox}
+  \SetBreakableRel{\approxeq}
+  \SetBreakableRel{\succapprox}
+  \SetBreakableRel{\precapprox}
+  \SetBreakableRel{\curvearrowleft}
+  \SetBreakableRel{\curvearrowright}
+  \SetBreakableRel{\backepsilon}
+}{}
+
+\@ifpackageloaded{amstex}% amstex
+{
+  \SetBreakableRel{\vartriangleright} \SetBreakableRel{\rhd}     %\global\let\rhd\vartriangleright
+  \SetBreakableRel{\vartriangleleft}  \SetBreakableRel{\lhd}     %\global\let\lhd\vartriangleleft
+  \SetBreakableRel{\trianglerighteq}  \SetBreakableRel{\unrhd}   %\global\let\unrhd\trianglerighteq
+  \SetBreakableRel{\trianglelefteq}   \SetBreakableRel{\unlhd}   %\global\let\unlhd\trianglelefteq
+  \SetBreakableRel{\rightsquigarrow}  \SetBreakableRel{\leadsto} %\global\let\leadsto\rightsquigarrow
+}{}
+
+\@ifpackageloaded{boisik}% boisik
+{
+  \SetOpenBracket{\binampersand}
+  \SetBreakableRel{\upharpoonright}
+  \SetBreakableRel{\downharpoonright}
+  \SetBreakableRel{\upharpoonleft}
+  \SetBreakableRel{\downharpoonleft}
+  \SetBreakableRel{\leftrightarrows}
+  \SetBreakableRel{\rightleftarrows}
+  \SetBreakableRel{\leftrightharpoons}
+  \SetBreakableRel{\leftleftarrows}
+  \SetBreakableRel{\rightrightarrows}
+  \SetBreakableRel{\upuparrows}
+  \SetBreakableRel{\downdownarrows}
+  \SetBreakableRel{\twoheadrightarrow}
+  \SetBreakableRel{\twoheadleftarrow}
+  \SetBreakableRel{\rightarrowtail}
+  \SetBreakableRel{\leftarrowtail}
+  \SetBreakableRel{\rightsquigarrow}
+  \SetBreakableRel{\leftrightsquigarrow}
+  \SetBreakableRel{\Lsh}
+  \SetBreakableRel{\Rsh}
+  \SetBreakableRel{\looparrowleft}
+  \SetBreakableRel{\looparrowright}
+  \SetBreakableRel{\circlearrowright}
+  \SetBreakableRel{\circlearrowleft}
+  \SetBreakableRel{\curvearrowleft}
+  \SetBreakableRel{\curvearrowright}
+  \SetBreakableRel{\nleftarrow}
+  \SetBreakableRel{\nrightarrow}
+  \SetBreakableRel{\nleftrightarrow}
+  \SetBreakableRel{\nLeftarrow}
+  \SetBreakableRel{\nRightarrow}
+  \SetBreakableRel{\nLeftrightarrow}
+  \SetBreakableRel{\Lleftarrow}
+  \SetBreakableRel{\Rrightarrow}
+  \SetBreakableRel{\nLeftrightarroW}
+% \SetBreakableRel{\lhook}
+% \SetBreakableRel{\rhook}
+  \SetBreakableRel{\multimap}
+  \SetBreakableRel{\multimapdot}
+  \SetBreakableRel{\therefore}
+  \SetBreakableRel{\because}
+  \SetBreakableRel{\between}
+  \SetBreakableRel{\Vdash}
+  \SetBreakableRel{\Vvdash}
+  \SetBreakableRel{\VDash}
+  \SetBreakableRel{\vDash}
+  \SetBreakableRel{\smallsmile}
+  \SetBreakableRel{\smallfrown}
+  \SetBreakableRel{\shortmid}
+  \SetBreakableRel{\shortparallel}
+  \SetBreakableRel{\thickapprox}
+  \SetBreakableBin{\divideontimes}
+  \SetBreakableBin{\lessdot}
+  \SetBreakableBin{\gtrdot}
+  \SetBreakableRel{\bumpeq}
+  \SetBreakableRel{\Bumpeq}
+  \SetBreakableRel{\leqslant}
+  \SetBreakableRel{\geqslant}
+  \SetBreakableRel{\eqslantless}
+  \SetBreakableRel{\eqslantgtr}
+  \SetBreakableRel{\curlyeqprec}
+  \SetBreakableRel{\curlyeqsucc}
+  \SetBreakableRel{\preccurlyeq}
+  \SetBreakableRel{\succcurlyeq}
+  \SetBreakableRel{\thicksim}
+  \SetBreakableRel{\backsim}
+  \SetBreakableRel{\eqsim}
+  \SetBreakableRel{\backsimeq}
+  \SetBreakableBin{\ltimes}
+  \SetBreakableBin{\rtimes}
+  \SetBreakableRel{\lll} \SetBreakableRel{\llless} %\global\let\llless\lll
+  \SetBreakableRel{\ggg} \SetBreakableRel{\gggtr}  %\global\let\gggtr\ggg
+  \SetBreakableRel{\triangleq}
+  \SetBreakableRel{\circeq}
+  \SetBreakableRel{\eqcirc}
+  \SetBreakableRel{\doteqdot} \SetBreakableRel{\Doteq} %\global\let\Doteq\doteqdot
+  \SetBreakableRel{\risingdotseq}
+  \SetBreakableRel{\fallingdotseq}
+  \SetBreakableRel{\varpropto}
+  \SetBreakableRel{\vartriangleright}
+  \SetBreakableRel{\vartriangleleft}
+  \SetBreakableRel{\trianglerighteq}
+  \SetBreakableRel{\trianglelefteq}
+  \SetBreakableRel{\blacktriangleright}
+  \SetBreakableRel{\blacktriangleleft}
+  \SetBreakableRel{\vartriangle}
+  \SetBreakableBin{\centerdot}
+  \SetBreakableBin{\boxplus}
+  \SetBreakableBin{\boxminus}
+  \SetBreakableBin{\boxtimes}
+  \SetBreakableBin{\boxdot}
+  \SetBreakableBin{\circledcirc}
+  \SetBreakableBin{\circledast}
+  \SetBreakableBin{\circleddash}
+  \SetBreakableBin{\intercal}
+  \SetBreakableRel{\prurel}
+  \SetBreakableRel{\scurel}
+  \SetBreakableRel{\disin}
+  \SetBreakableRel{\nisd}
+  \SetBreakableRel{\fatslash}
+  \SetBreakableRel{\fatbslash}
+  \SetBreakableRel{\nequiv}
+  \SetBreakableRel{\bagmember}
+  \SetBreakableRel{\lvertneqq}
+  \SetBreakableRel{\gvertneqq}
+  \SetBreakableRel{\nleq}
+  \SetBreakableRel{\ngeq}
+  \SetBreakableRel{\nless}
+  \SetBreakableRel{\ngtr}
+  \SetBreakableRel{\nprec}
+  \SetBreakableRel{\nsucc}
+  \SetBreakableRel{\lneqq}
+  \SetBreakableRel{\gneqq}
+  \SetBreakableRel{\nleqslant}
+  \SetBreakableRel{\ngeqslant}
+  \SetBreakableRel{\lneq}
+  \SetBreakableRel{\gneq}
+  \SetBreakableRel{\npreceq}
+  \SetBreakableRel{\nsucceq}
+  \SetBreakableRel{\nleqq}
+  \SetBreakableRel{\ngeqq}
+  \SetBreakableRel{\lnsim}
+  \SetBreakableRel{\gnsim}
+  \SetBreakableRel{\precnsim}
+  \SetBreakableRel{\succnsim}
+  \SetBreakableRel{\precneqq}
+  \SetBreakableRel{\succneqq}
+  \SetBreakableRel{\nsim}
+  \SetBreakableRel{\ncong}
+  \SetBreakableRel{\lnapprox}
+  \SetBreakableRel{\gnapprox}
+  \SetBreakableRel{\precnapprox}
+  \SetBreakableRel{\succnapprox}
+  \SetBreakableRel{\nsubset}
+  \SetBreakableRel{\nsupset}
+  \SetBreakableRel{\varsubsetneq}
+  \SetBreakableRel{\varsupsetneq}
+  \SetBreakableRel{\nsubseteqq}
+  \SetBreakableRel{\nsupseteqq}
+  \SetBreakableRel{\subsetneqq}
+  \SetBreakableRel{\supsetneqq}
+  \SetBreakableRel{\varsubsetneqq}
+  \SetBreakableRel{\varsupsetneqq}
+  \SetBreakableRel{\subsetneq}
+  \SetBreakableRel{\supsetneq}
+  \SetBreakableRel{\nsubseteq}
+  \SetBreakableRel{\nsupseteq}
+  \SetBreakableRel{\nparallel}
+  \SetBreakableRel{\nmid}
+  \SetBreakableRel{\nshortmid}
+  \SetBreakableRel{\nshortparallel}
+  \SetBreakableRel{\nvdash}
+  \SetBreakableRel{\nVdash}
+  \SetBreakableRel{\nvDash}
+  \SetBreakableRel{\nVDash}
+  \SetBreakableRel{\ntrianglerighteq}
+  \SetBreakableRel{\ntrianglelefteq}
+  \SetBreakableRel{\ntriangleleft}
+  \SetBreakableRel{\ntriangleright}
+  \SetBreakableRel{\precapprox}
+  \SetBreakableRel{\succapprox}
+  \SetBreakableRel{\precsim}
+  \SetBreakableRel{\succsim}
+  \SetBreakableRel{\lesssim}
+  \SetBreakableRel{\gtrsim}
+  \SetBreakableRel{\lessapprox}
+  \SetBreakableRel{\gtrapprox}
+  \SetBreakableRel{\leqq}
+  \SetBreakableRel{\geqq}
+  \SetBreakableRel{\lessgtr}
+  \SetBreakableRel{\gtrless}
+  \SetBreakableRel{\lesseqgtr}
+  \SetBreakableRel{\gtreqless}
+  \SetBreakableRel{\lesseqqgtr}
+  \SetBreakableRel{\gtreqqless}
+  \SetBreakableRel{\Subset}
+  \SetBreakableRel{\Supset}
+  \SetBreakableBin{\Cup} \SetBreakableBin{\doublecup} %\global\let\doublecup\Cup
+  \SetBreakableBin{\Cap} \SetBreakableBin{\doublecap} %\global\let\doublecap\Cap
+  \SetBreakableRel{\subseteqq}
+  \SetBreakableRel{\supseteqq}
+  \SetBreakableBin{\curlywedge}
+  \SetBreakableBin{\curlyvee}
+  \SetBreakableBin{\veebar}
+  \SetBreakableBin{\barwedge}
+  \SetBreakableBin{\doublebarwedge}
+  \SetBreakableBin{\leftthreetimes}
+  \SetBreakableBin{\rightthreetimes}
+  \SetBreakableBin{\smallsetminus}
+  \SetBreakableRel{\approxeq}
+  \SetBreakableBin{\dotplus}
+  \SetBreakableRel{\pitchfork}
+  \SetBreakableBin{\oblong}
+  \SetBreakableBin{\talloblong}
+  \SetBreakableBin{\sslash}
+  \SetBreakableBin{\bbslash}
+  \SetBreakableRel{\hash}
+  \SetBreakableRel{\varhash}
+  \SetBreakableBin{\convolution}
+  \SetBreakableBin{\coAsterisk}
+  \SetBreakableRel{\veeeq}
+  \SetBreakableRel{\corresponds}
+  \SetBreakableRel{\arceq}
+  \SetBreakableRel{\CircledEq}
+  \SetBreakableRel{\eqbumped}
+  \SetBreakableRel{\dotminus}
+  \SetBreakableRel{\kernelcontraction}
+  \SetBreakableRel{\dotsim}
+  \SetBreakableRel{\simrdots}
+  \SetBreakableBin{\circplus}
+  \SetBreakableBin{\dottimes}
+  \SetBreakableBin{\vartimes}
+  \SetBreakableBin{\merge}
+  \SetBreakableBin{\veeonvee}
+  \SetBreakableBin{\obslash}
+  \SetBreakableBin{\otop}
+  \SetBreakableBin{\obot}
+  \SetBreakableBin{\oleft}
+  \SetBreakableBin{\oright}
+  \SetBreakableBin{\obar}
+  \SetBreakableBin{\otriangle}
+  \SetBreakableBin{\olessthan}
+  \SetBreakableBin{\ogreaterthan}
+  \SetBreakableBin{\ovee}
+  \SetBreakableBin{\owedge}
+  \SetBreakableBin{\boxbslash}
+  \SetBreakableBin{\boxtop}
+  \SetBreakableBin{\boxbot}
+  \SetBreakableBin{\boxleft}
+  \SetBreakableBin{\boxright}
+  \SetBreakableBin{\boxbar}
+  \SetBreakableBin{\boxslash}
+  \SetBreakableBin{\boxtriangle}
+  \SetBreakableBin{\boxast}
+  \SetBreakableBin{\boxcircle}
+  \SetBreakableBin{\boxdivision}
+  \SetBreakableBin{\boxbox}
+  \SetBreakableBin{\diamondop}
+  \SetBreakableBin{\diamondminus}
+  \SetBreakableBin{\diamondbar}
+  \SetBreakableBin{\diamondtimes}
+  \SetBreakableBin{\diamondplus}
+  \SetBreakableBin{\diamondtriangle}
+  \SetBreakableBin{\diamondcircle}
+  \SetBreakableBin{\cupleftarrow}
+  \SetBreakableBin{\varcup}
+  \SetBreakableBin{\varcap}
+  \SetBreakableBin{\varsqcup}
+  \SetBreakableBin{\varsqcap}
+  \SetBreakableRel{\sqSubset}
+  \SetBreakableRel{\sqSupset}
+  \SetBreakableRel{\inplus}
+  \SetBreakableRel{\niplus}
+  \SetBreakableRel{\varisins}
+  \SetBreakableRel{\varnis}
+  \SetBreakableRel{\subsetplus}
+  \SetBreakableRel{\supsetplus}
+  \SetBreakableRel{\subsetpluseq}
+  \SetBreakableRel{\supsetpluseq}
+  \SetBreakableBin{\nplus}
+  \SetBreakableBin{\squplus}
+  \SetBreakableRel{\multimapboth}
+  \SetBreakableRel{\multimapdotboth}
+  \SetBreakableRel{\multimapdotbothB}
+  \SetBreakableRel{\multimapdotbothA}
+  \SetBreakableRel{\multimapinv}
+  \SetBreakableRel{\multimapdotinv}
+  \SetBreakableRel{\multimapbothvert}
+  \SetBreakableRel{\multimapdotbothvert}
+  \SetBreakableRel{\multimapdotbothBvert}
+  \SetBreakableRel{\multimapdotbothAvert}
+  \SetBreakableRel{\dfourier}
+  \SetBreakableRel{\Dfourier}
+  \SetBreakableRel{\ztransf}
+  \SetBreakableRel{\Ztransf}
+  \SetBreakableRel{\Lt}
+  \SetBreakableRel{\Gt}
+  \SetBreakableBin{\leftslice}
+  \SetBreakableBin{\rightslice}
+  \SetBreakableRel{\trianglelefteqslant}
+  \SetBreakableRel{\trianglerighteqslant}
+  \SetBreakableBin{\Ydown}
+  \SetBreakableBin{\Yup}
+  \SetBreakableBin{\Yleft}
+  \SetBreakableBin{\Yright}
+  \SetBreakableRel{\dashVv}
+  \SetBreakableRel{\DashV}
+  \SetBreakableRel{\DashV}
+  \SetBreakableRel{\dashV}
+  \SetBreakableBin{\lbag}
+  \SetBreakableBin{\rbag}
+  \SetBreakableRel{\Perp}
+  \SetBreakableBin{\moo}
+  \SetBreakableBin{\baro}
+  \SetBreakableBin{\pluscirc}
+  \SetBreakableBin{\minuso}
+  \SetBreakableRel{\llcurly}
+  \SetBreakableRel{\ggcurly}
+  \SetBreakableRel{\strictfi}
+  \SetBreakableRel{\strictif}
+  \SetBreakableRel{\ac}
+  \SetBreakableBin{\varintercal}
+  \SetBreakableRel{\equalparallel}
+  \SetBreakableBin{\plustrif}
+  \SetBreakableBin{\smashtimes}
+  \SetBreakableRel{\ltcir}
+  \SetBreakableRel{\gtcir}
+  \SetBreakableRel{\glj}
+  \SetBreakableBin{\Vee}
+  \SetBreakableBin{\Wedge}
+  \SetBreakableBin{\fatsemi}
+  \SetBreakableRel{\forkv}
+  \SetBreakableRel{\topfork}
+  \SetBreakableRel{\twoheaduparrow}
+  \SetBreakableRel{\twoheaddownarrow}
+  \SetBreakableRel{\mapsfrom}
+  \SetBreakableRel{\mapsup}
+  \SetBreakableRel{\mapsdown}
+  \SetBreakableRel{\nVleftarrow}
+  \SetBreakableRel{\nVrightarrow}
+  \SetBreakableRel{\rightarrowcircle}
+  \SetBreakableRel{\nwarrowcorner}
+  \SetBreakableRel{\nearrowcorner}
+  \SetBreakableRel{\barovernorthwestarrow}
+  \SetBreakableRel{\carriagereturn}
+  \SetBreakableRel{\linefeed}
+  \SetBreakableRel{\leftzigzagarrow}
+  \SetBreakableRel{\Nwarrow}
+  \SetBreakableRel{\Nearrow}
+  \SetBreakableRel{\Swarrow}
+  \SetBreakableRel{\Searrow}
+  \SetBreakableRel{\nHuparrow}
+  \SetBreakableRel{\nHdownarrow}
+  \SetBreakableRel{\updownarrowbar}
+  \SetBreakableRel{\barleftarrow}
+  \SetBreakableRel{\rightarrowbar}
+  \SetBreakableRel{\leftsquigarrow}
+  \SetBreakableRel{\rightsquigarrow}
+  \SetBreakableRel{\leftrightsquigarrow}
+  \SetBreakableRel{\downzigzagarrow}
+  \SetBreakableRel{\rightthreearrows}
+  \SetBreakableRel{\barleftarrowrightarrowbar}
+  \SetBreakableRel{\leftdasharrow}
+  \SetBreakableRel{\rightdasharrow}
+  \SetBreakableRel{\updasharrow}
+  \SetBreakableRel{\downdasharrow}
+  \SetBreakableRel{\upwhitearrow}
+  \SetBreakableRel{\downwhitearrow}
+  \SetBreakableRel{\whitearrowupfrombar}
+  \SetBreakableRel{\whitearrowuppedestal}
+  \SetBreakableRel{\whitearrowuppedestalhbar}
+  \SetBreakableRel{\whitearrowuppedestalvbar}
+  \SetBreakableRel{\twoheadwhiteuparrow}
+  \SetBreakableRel{\twoheadwhiteuparrowpedestal}
+  \SetBreakableRel{\updownwhitearrow}
+  \SetBreakableRel{\leftblackarrow}
+  \SetBreakableRel{\rightblackarrow}
+  \SetBreakableRel{\upblackarrow}
+  \SetBreakableRel{\downblackarrow}
+  \SetBreakableRel{\leftrightblackarrow}
+  \SetBreakableRel{\updownblackarrow}
+  \SetBreakableRel{\curlyveeuparrow}
+  \SetBreakableRel{\curlyveedownarrow}
+  \SetBreakableRel{\curlywedgeuparrow}
+  \SetBreakableRel{\curlywedgedownarrow}
+  \SetBreakableRel{\Mapsfrom}
+  \SetBreakableRel{\Mapsto}
+  \SetBreakableRel{\leftwhitearrow}
+  \SetBreakableRel{\rightwhitearrow}
+  \SetBreakableRel{\leftwhiteroundarrow}
+  \SetBreakableRel{\rightwhiteroundarrow}
+  \SetBreakableRel{\righttoleftarrow}
+  \SetBreakableRel{\lefttorightarrow}
+  \SetBreakableRel{\looparrowdownleft}
+  \SetBreakableRel{\looparrowdownright}
+  \SetBreakableRel{\uptodownarrow}
+  \SetBreakableRel{\downtouparrow}
+  \SetBreakableRel{\nnearrow}
+  \SetBreakableRel{\ssearrow}
+  \SetBreakableRel{\nnwarrow}
+  \SetBreakableRel{\sswarrow}
+  \SetBreakableRel{\curvearrowleft}
+  \SetBreakableRel{\curvearrowright}
+  \SetBreakableRel{\curvearrowleftright}
+  \SetBreakableRel{\curvearrowbotleft}
+  \SetBreakableRel{\curvearrowbotright}
+  \SetBreakableRel{\curvearrowbotleftright}
+  \SetBreakableRel{\leftrightarroweq}
+  \SetBreakableRel{\eqleftrightarrow}
+  \SetBreakableRel{\dlsh}
+  \SetBreakableRel{\drsh}
+  \SetBreakableRel{\leftarrowTriangle}
+  \SetBreakableRel{\rightarrowTriangle}
+  \SetBreakableRel{\leftrightarrowTriangle}
+  \SetBreakableRel{\leftarrowtriangle}
+  \SetBreakableRel{\rightarrowtriangle}
+  \SetBreakableRel{\leftrightarrowtriangle}
+}{}
+
+\@ifpackageloaded{euler}% euler
+{
+  \SetBreakableRel{\uparrow}
+  \SetBreakableRel{\downarrow}
+  \SetBreakableRel{\updownarrow}
+  \SetBreakableRel{\Uparrow}
+  \SetBreakableRel{\Downarrow}
+  \SetBreakableRel{\Updownarrow}
+% \SetBreakableRel{\lhook}
+% \SetBreakableRel{\rhook}
+}{}
+
+\@ifpackageloaded{fourier}% fourier
+{
+  \SetOpenBracket{\llbracket}
+  \SetBreakableRel{\leqslant}
+  \SetBreakableRel{\geqslant}
+  \SetBreakableRel{\parallelslant}
+  \SetBreakableRel{\vDash}
+  \SetBreakableRel{\blacktriangleleft}
+  \SetBreakableRel{\blacktriangleright}
+  \SetBreakableRel{\nleqslant}
+  \SetBreakableRel{\ngeqslant}
+  \SetBreakableRel{\nparallel}
+  \SetBreakableRel{\nparallelslant}
+  \SetBreakableRel{\nvDash}
+  \SetBreakableBin{\intercal}
+  \SetBreakableRel{\varsubsetneq}
+  \SetBreakableRel{\notowns}
+  \SetBreakableBin{\smallsetminus}
+  \SetBreakableRel{\subsetneqq}
+  \SetBreakableRel{\rightrightarrows}
+  \SetBreakableRel{\leftleftarrows}
+  \SetBreakableRel{\curvearrowleft}
+  \SetBreakableRel{\curvearrowright}
+  \SetBreakableRel{\Downarrow}
+}{}
+
+% Lucida font (lucbmath,lucidabr,lucmin,lucmtime,luctime)
+\def\do#1{}
+\@ifpackageloaded{lucbmath}{ \gdef\do#1{#1} }{}
+\@ifpackageloaded{lucidabr}{ \gdef\do#1{#1} }{}
+\@ifpackageloaded{lucmin}  { \gdef\do#1{#1} }{}
+\@ifpackageloaded{lucmtime}{ \gdef\do#1{#1} }{}
+\@ifpackageloaded{luctime} { \gdef\do#1{#1} }{}
+\do{
+% \SetBreakableRel{\relbar}
+% \SetBreakableRel{\Relbar}
+  \SetBreakableRel{\leadsfrom}
+  \SetBreakableRel{\defineequal}
+  \SetBreakableRel{\notequiv}
+  \SetBreakableRel{\notapprox}
+  \SetBreakableRel{\notasymp}
+  \SetBreakableRel{\notsubset}
+  \SetBreakableRel{\notsupset}
+  \SetBreakableRel{\notsim}
+  \SetBreakableRel{\notsubseteq}
+  \SetBreakableRel{\notsupseteq}
+  \SetBreakableRel{\notsimeq}
+  \SetBreakableRel{\notsqsubseteq}
+  \SetBreakableRel{\notsqsupseteq}
+  \SetBreakableRel{\notcong}
+  \SetBreakableRel{\notni}
+  \SetBreakableBin{\boxdot}
+  \SetBreakableBin{\boxplus}
+  \SetBreakableBin{\boxtimes}
+  \SetBreakableBin{\centerdot}
+  \SetBreakableRel{\circlearrowright}
+  \SetBreakableRel{\circlearrowleft}
+  \SetBreakableRel{\leftrightharpoons}
+  \SetBreakableBin{\boxminus}
+  \SetBreakableRel{\Vdash}
+  \SetBreakableRel{\Vvdash}
+  \SetBreakableRel{\vDash}
+  \SetBreakableRel{\twoheadrightarrow}
+  \SetBreakableRel{\twoheadleftarrow}
+  \SetBreakableRel{\leftleftarrows}
+  \SetBreakableRel{\rightrightarrows}
+  \SetBreakableRel{\upuparrows}
+  \SetBreakableRel{\downdownarrows}
+  \SetBreakableRel{\upharpoonright}
+  \SetBreakableRel{\downharpoonright}
+  \SetBreakableRel{\upharpoonleft}
+  \SetBreakableRel{\downharpoonleft}
+  \SetBreakableRel{\rightarrowtail}
+  \SetBreakableRel{\leftarrowtail}
+  \SetBreakableRel{\leftrightarrows}
+  \SetBreakableRel{\rightleftarrows}
+  \SetBreakableRel{\Lsh}
+  \SetBreakableRel{\Rsh}
+  \SetBreakableRel{\rightsquigarrow}
+  \SetBreakableRel{\leftsquigarrow}
+  \SetBreakableRel{\leftrightsquigarrow}
+  \SetBreakableRel{\looparrowleft}
+  \SetBreakableRel{\looparrowright}
+  \SetBreakableRel{\circeq}
+  \SetBreakableRel{\succsim}
+  \SetBreakableRel{\gtrsim}
+  \SetBreakableRel{\gtrapprox}
+  \SetBreakableRel{\multimap}
+  \SetBreakableRel{\image}
+  \SetBreakableRel{\original}
+  \SetBreakableRel{\therefore}
+  \SetBreakableRel{\because}
+  \SetBreakableRel{\doteqdot}
+  \SetBreakableRel{\triangleq}
+  \SetBreakableRel{\precsim}
+  \SetBreakableRel{\lesssim}
+  \SetBreakableRel{\lessapprox}
+  \SetBreakableRel{\eqslantless}
+  \SetBreakableRel{\eqslantgtr}
+  \SetBreakableRel{\curlyeqprec}
+  \SetBreakableRel{\curlyeqsucc}
+  \SetBreakableRel{\preccurlyeq}
+  \SetBreakableRel{\leqq}
+  \SetBreakableRel{\leqslant}
+  \SetBreakableRel{\lessgtr}
+  \SetBreakableRel{\risingdotseq}
+  \SetBreakableRel{\fallingdotseq}
+  \SetBreakableRel{\succcurlyeq}
+  \SetBreakableRel{\geqq}
+  \SetBreakableRel{\geqslant}
+  \SetBreakableRel{\gtrless}
+  \SetBreakableRel{\vartriangleright}
+  \SetBreakableRel{\vartriangleleft}
+  \SetBreakableRel{\trianglerighteq}
+  \SetBreakableRel{\trianglelefteq}
+  \SetBreakableRel{\between}
+  \SetBreakableRel{\blacktriangleright}
+  \SetBreakableRel{\blacktriangleleft}
+  \SetBreakableRel{\vartriangle}
+  \SetBreakableRel{\eqcirc}
+  \SetBreakableRel{\lesseqgtr}
+  \SetBreakableRel{\gtreqless}
+  \SetBreakableRel{\lesseqqgtr}
+  \SetBreakableRel{\gtreqqless}
+  \SetBreakableRel{\Rrightarrow}
+  \SetBreakableRel{\Lleftarrow}
+  \SetBreakableBin{\veebar}
+  \SetBreakableBin{\barwedge}
+  \SetBreakableRel{\varpropto}
+  \SetBreakableRel{\smallsmile}
+  \SetBreakableRel{\smallfrown}
+  \SetBreakableRel{\Subset}
+  \SetBreakableRel{\Supset}
+  \SetBreakableBin{\Cup}
+  \SetBreakableBin{\Cap}
+  \SetBreakableBin{\curlywedge}
+  \SetBreakableBin{\curlyvee}
+  \SetBreakableBin{\leftthreetimes}
+  \SetBreakableBin{\rightthreetimes}
+  \SetBreakableRel{\subseteqq}
+  \SetBreakableRel{\supseteqq}
+  \SetBreakableRel{\bumpeq}
+  \SetBreakableRel{\Bumpeq}
+  \SetBreakableRel{\lll}
+  \SetBreakableRel{\ggg}
+  \SetBreakableRel{\pitchfork}
+  \SetBreakableBin{\dotplus}
+  \SetBreakableRel{\backsim}
+  \SetBreakableRel{\backsimeq}
+  \SetBreakableBin{\intercal}
+  \SetBreakableBin{\circledcirc}
+  \SetBreakableBin{\circledast}
+  \SetBreakableBin{\circleddash}
+  \SetBreakableRel{\lvertneqq}
+  \SetBreakableRel{\gvertneqq}
+  \SetBreakableRel{\nleq}
+  \SetBreakableRel{\ngeq}
+  \SetBreakableRel{\nless}
+  \SetBreakableRel{\ngtr}
+  \SetBreakableRel{\nprec}
+  \SetBreakableRel{\nsucc}
+  \SetBreakableRel{\lneqq}
+  \SetBreakableRel{\gneqq}
+  \SetBreakableRel{\nleqslant}
+  \SetBreakableRel{\ngeqslant}
+  \SetBreakableRel{\lneq}
+  \SetBreakableRel{\gneq}
+  \SetBreakableRel{\npreceq}
+  \SetBreakableRel{\nsucceq}
+  \SetBreakableRel{\precnsim}
+  \SetBreakableRel{\succnsim}
+  \SetBreakableRel{\lnsim}
+  \SetBreakableRel{\gnsim}
+  \SetBreakableRel{\nleqq}
+  \SetBreakableRel{\ngeqq}
+  \SetBreakableRel{\precneqq}
+  \SetBreakableRel{\succneqq}
+  \SetBreakableRel{\precnapprox}
+  \SetBreakableRel{\succnapprox}
+  \SetBreakableRel{\lnapprox}
+  \SetBreakableRel{\gnapprox}
+  \SetBreakableRel{\nsim}
+  \SetBreakableRel{\ncong}
+  \SetBreakableRel{\diagup}
+  \SetBreakableRel{\diagdown}
+  \SetBreakableRel{\varsubsetneq}
+  \SetBreakableRel{\varsupsetneq}
+  \SetBreakableRel{\nsubseteqq}
+  \SetBreakableRel{\nsupseteqq}
+  \SetBreakableRel{\subsetneqq}
+  \SetBreakableRel{\supsetneqq}
+  \SetBreakableRel{\varsubsetneqq}
+  \SetBreakableRel{\varsupsetneqq}
+  \SetBreakableRel{\subsetneq}
+  \SetBreakableRel{\supsetneq}
+  \SetBreakableRel{\nsubseteq}
+  \SetBreakableRel{\nsupseteq}
+  \SetBreakableRel{\nparallel}
+  \SetBreakableRel{\nmid}
+  \SetBreakableRel{\nshortmid}
+  \SetBreakableRel{\nshortparallel}
+  \SetBreakableRel{\nvdash}
+  \SetBreakableRel{\nVdash}
+  \SetBreakableRel{\nvDash}
+  \SetBreakableRel{\nVDash}
+  \SetBreakableRel{\ntrianglerighteq}
+  \SetBreakableRel{\ntrianglelefteq}
+  \SetBreakableRel{\ntriangleleft}
+  \SetBreakableRel{\ntriangleright}
+  \SetBreakableRel{\nleftarrow}
+  \SetBreakableRel{\nrightarrow}
+  \SetBreakableRel{\nLeftarrow}
+  \SetBreakableRel{\nRightarrow}
+  \SetBreakableRel{\nLeftrightarrow}
+  \SetBreakableRel{\nleftrightarrow}
+  \SetBreakableBin{\divideontimes}
+  \SetBreakableRel{\eqsim}
+  \SetBreakableRel{\lessdot}
+  \SetBreakableRel{\gtrdot}
+  \SetBreakableBin{\ltimes}
+  \SetBreakableBin{\rtimes}
+  \SetBreakableRel{\shortmid}
+  \SetBreakableRel{\shortparallel}
+  \SetBreakableBin{\smallsetminus}
+  \SetBreakableRel{\thicksim}
+  \SetBreakableRel{\thickapprox}
+  \SetBreakableRel{\approxeq}
+  \SetBreakableRel{\succapprox}
+  \SetBreakableRel{\precapprox}
+  \SetBreakableRel{\curvearrowleft}
+  \SetBreakableRel{\curvearrowright}
+  \SetBreakableRel{\backepsilon}
+}
+
+\@ifpackageloaded{mathbbol}% mathybbol
+{
+  \SetOpenBracket{\Langle}
+  \SetOpenBracket{\Lparen}
+}{}
+
+\@ifpackageloaded{mdwmath}% mdwmath
+{
+  \SetBreakableBin{\bitand}
+  \begingroup
+    \catcode`\&\active \xdef&{\noexpand\brokenbin{\mathchar\number\mathcode`\&}}
+  \endgroup
+  \AtBeginDocument{\mathcode`\&=32768 }
+}{}
+
+\@ifpackageloaded{sbbm}% sbbm
+{
+  \SetOpenBracket{\Lparen}
+}{}
+
+\@ifpackageloaded{stmaryrd}% stmaryrd
+{
+  \SetOpenBracket{\Lbag}
+  \SetOpenBracket{\llparenthesis}
+  \SetOpenBracket{\binampersand}
+  \SetOpenBracket{\llfloor}
+  \SetOpenBracket{\llceil}
+  \SetOpenBracket{\llbracket}
+  \SetBreakableRel{shortleftarrow}
+  \SetBreakableRel{shortrightarrow}
+  \SetBreakableRel{shortuparrow}
+  \SetBreakableRel{shortdownarrow}
+  \SetBreakableBin{Yup}
+  \SetBreakableBin{Ydown}
+  \SetBreakableBin{Yleft}
+  \SetBreakableBin{Yright}
+  \SetBreakableBin{varcurlyvee}
+  \SetBreakableBin{varcurlywedge}
+  \SetBreakableBin{minuso}
+  \SetBreakableBin{baro}
+  \SetBreakableBin{sslash}
+  \SetBreakableBin{bbslash}
+  \SetBreakableBin{moo}
+  \SetBreakableBin{varotimes}
+  \SetBreakableBin{varoast}
+  \SetBreakableBin{varobar}
+  \SetBreakableBin{varodot}
+  \SetBreakableBin{varoslash}
+  \SetBreakableBin{varobslash}
+  \SetBreakableBin{varocircle}
+  \SetBreakableBin{varoplus}
+  \SetBreakableBin{varominus}
+  \SetBreakableBin{boxast}
+  \SetBreakableBin{boxbar}
+  \SetBreakableBin{boxdot}
+  \SetBreakableBin{boxslash}
+  \SetBreakableBin{boxbslash}
+  \SetBreakableBin{boxcircle}
+  \SetBreakableBin{boxbox}
+  \SetBreakableBin{boxempty}
+  \SetBreakableBin{merge}
+  \SetBreakableBin{vartimes}
+  \SetBreakableBin{fatsemi}
+  \SetBreakableRel{sswarrow}
+  \SetBreakableRel{ssearrow}
+  \SetBreakableRel{curlywedgeuparrow}
+  \SetBreakableRel{curlywedgedownarrow}
+  \SetBreakableBin{fatslash}
+  \SetBreakableBin{fatbslash}
+  \SetBreakableBin{lbag}
+  \SetBreakableBin{rbag}
+  \SetBreakableBin{varbigcirc}
+  \SetBreakableRel{leftrightarroweq}
+  \SetBreakableRel{curlyveedownarrow}
+  \SetBreakableRel{curlyveeuparrow}
+  \SetBreakableRel{nnwarrow}
+  \SetBreakableRel{nnearrow}
+  \SetBreakableBin{leftslice}
+  \SetBreakableBin{rightslice}
+  \SetBreakableBin{varolessthan}
+  \SetBreakableBin{varogreaterthan}
+  \SetBreakableBin{varovee}
+  \SetBreakableBin{varowedge}
+  \SetBreakableBin{talloblong}
+  \SetBreakableBin{interleave}
+  \SetBreakableBin{obar}
+  \SetBreakableBin{obslash}
+  \SetBreakableBin{olessthan}
+  \SetBreakableBin{ogreaterthan}
+  \SetBreakableBin{ovee}
+  \SetBreakableBin{owedge}
+  \SetBreakableBin{oblong}
+  \SetBreakableRel{inplus}
+  \SetBreakableRel{niplus}
+  \SetBreakableBin{nplus}
+  \SetBreakableRel{subsetplus}
+  \SetBreakableRel{supsetplus}
+  \SetBreakableRel{subsetpluseq}
+  \SetBreakableRel{supsetpluseq}
+  \SetBreakableRel{trianglelefteqslant}
+  \SetBreakableRel{trianglerighteqslant}
+  \SetBreakableRel{ntrianglelefteqslant}
+  \SetBreakableRel{ntrianglerighteqslant}
+  \SetBreakableRel{arrownot}
+  \SetBreakableRel{Arrownot}
+  \SetBreakableRel{Mapstochar}
+  \SetBreakableRel{mapsfromchar}
+  \SetBreakableRel{Mapsfromchar}
+  \SetBreakableBin{leftrightarrowtriangle}
+  \SetBreakableRel{leftarrowtriangle}
+  \SetBreakableRel{rightarrowtriangle}
+  \SetBreakableRel{\longarrownot}
+  \SetBreakableRel{\Longarrownot}
+  \SetBreakableRel{\Mapsto}
+  \SetBreakableRel{\mapsfrom}
+  \SetBreakableRel{\Mapsfrom}
+  \SetBreakableRel{\Longmapsto}
+  \SetBreakableRel{\longmapsfrom}
+  \SetBreakableRel{\Longmapsfrom}
+}{}
+
+\@ifpackageloaded{wasysym}% wasysym
+{
+  \SetBreakableBin{LHD}
+  \SetBreakableBin{RHD}
+  \SetBreakableRel{apprle}
+  \SetBreakableRel{apprge}
+  \SetBreakableRel{wasypropto}
+  \SetBreakableRel{invneg}
+  \SetBreakableBin{ocircle}
+  \SetBreakableRel{logof}
+}{}
