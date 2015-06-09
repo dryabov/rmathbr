@@ -253,6 +253,10 @@
 % \subsection*{Initialization}
 %
 %    \begin{macrocode}
+\RequirePackage{ifetex}
+\RequirePackage{mathstyle}
+%    \end{macrocode}
+%    \begin{macrocode}
 \@ifpackageloaded{breqn}%
 {
   \PackageError{rmathbr}{'rmathbr' package cannot be used together with 'breqn' package!}{}%
@@ -960,10 +964,41 @@
 % \begin{macro}{\cdott}
 % \verb|\cdott| is \verb|\cdot| that is changed to \verb|\times| at break point.
 %    \begin{macrocode}
-\def\cdott{%
+\def\rmathbr@cdott{%
+  %% inplace-expanded mathchoice from mathstyle.sty
+  \mathchoice{%
     \mkern\medmuskip$%
     \discretionary{\the\textfont2\char2}{\the\textfont2\char2}{\the\textfont2\char1}%
-    $\mkern\medmuskip%
+    $\displaystyle\mkern\medmuskip%
+  }{%
+    \mkern\medmuskip$%
+    \discretionary{\the\textfont2\char2}{\the\textfont2\char2}{\the\textfont2\char1}%
+    $\textstyle\mkern\medmuskip%
+  }{%
+    $%
+    \discretionary{\the\scriptfont2\char2}{\the\scriptfont2\char2}{\the\scriptfont2\char1}%
+    $\scriptstyle%
+  }{%
+    $%
+    \discretionary{\the\scriptscriptfont2\char2}{\the\scriptscriptfont2\char2}{\the\scriptscriptfont2\char1}%
+    $\scriptscriptstyle%
+  }
+}
+\def\cdott{%
+  \ensuremath
+  \ifetex
+    \ifinner%
+      \ifnum\currentgrouptype=15\relax
+        \rmathbr@cdott
+      \else
+        \cdot
+      \fi
+    \else
+      \cdot
+    \fi
+  \else
+    \rmathbr@cdott
+  \fi
 }
 %    \end{macrocode}
 % \end{macro}
