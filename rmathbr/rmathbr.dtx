@@ -28,7 +28,7 @@
 %<package>\NeedsTeXFormat{LaTeX2e}[1999/12/01]
 %<package>\ProvidesPackage{rmathbr}
 %<*package>
-    [2015/06/02 1.0 Repeating of math operator at the broken line and the new line in inline equations]
+    [2015/06/09 1.0.1 Repeating of math operator at the broken line and the new line in inline equations]
 %</package>
 %
 %<*driver>
@@ -54,7 +54,7 @@
 %</driver>
 % \fi
 %
-% \CheckSum{3109}
+% \CheckSum{3261}
 %
 % \CharacterTable
 %  {Upper-case    \A\B\C\D\E\F\G\H\I\J\K\L\M\N\O\P\Q\R\S\T\U\V\W\X\Y\Z
@@ -103,7 +103,8 @@
 % \begin{multicols}{5}
 % \noindent $(a+b)^2=a^2+2ab+b^2$, $a^2-b^2=(a+b)\*(a-b)$,
 % $a^3\pm b^3=(a\pm b)\*(a^2\mp ab+b^2)$, $(1-x)^{-2}=1+2x+3x^2+\ldots$,
-% $\sin^2\alpha+\cos^2\alpha=1$, $\int x\sin ax\,dx=a^{-2}(\sin ax-ax\cos ax)$.
+% $\sin^2\alpha+\cos^2\alpha=1$, $\int x\sin ax\,dx=a^{-2}(\sin ax-ax\cos ax)$,
+% $t_1t_2\cos\theta=\vec t_1\cdot\vec t_2$, $x=12\cdott 3\cdott 10^3$.
 % \end{multicols}
 %
 % It's recommended to load \textsf{rmathbr} after other packages, because of \textsf{rmathbr} has
@@ -117,9 +118,9 @@
 %
 % The \textsf{rmathbr} package supports following options:
 % \begin{itemize}
-% \item \verb|mathactivechars| (default): assign 12 category to \verb|^| and
-%       \verb|_| characters.
-% \item \verb|activechars|: assign active category to \verb|^| and
+% \item \verb|mathactivechars| (default): assign mathactive (12) category to
+%       \verb|^| and \verb|_| characters.
+% \item \verb|activechars|: assign active (13) category to \verb|^| and
 %       \verb|_| characters.
 % \item \verb|noactivechars|: assign default categories to \verb|^| and
 %       \verb|_| characters (7 and 8, correspondingly).
@@ -138,18 +139,8 @@
 %
 % \DescribeMacro{\cdott}
 %
-% It looks like it is impossible in \LaTeX{} to correctly change
-% \verb|\cdot| ($\cdot$) to \verb|\times| ($\times$) at break, that's why
-% \verb|\cdott| command is introduced. It correctly displays $\cdot$ and changes
-% it to $\times$, but has some limitations:
-% \begin{itemize}
-%   \item It cannot be used inside of group (e.g. \verb|{a\cdott b}|).
-%   \item It doesn't support math display modes (e.g. \verb|\scriptstyle a\cdott b|)
-% \end{itemize}
-%
-% These limitations are related to the fact that internally \verb|\cdott| closes
-% math mode, insert multiplication character in text mode, and open math mode
-% again.
+% This command displays \verb|\cdot| ($\cdot$) that is changed to
+% \verb|\times| ($\times$) at break.
 %
 % \DescribeMacro{\nobr}
 %
@@ -186,13 +177,17 @@
 %
 % \section{Known issues}
 % \begin{itemize}
-%   \item expressions like \verb|$x+\ldots+y$| may be broken on pluses
 %   \item 'xy' package: should be loaded after 'rmathbr' to work properly
 %   \item 'breqn' package: cannot work together with 'rmathbr'
 %  \end{itemize}
 %
 % \section{Changelog}
 %
+% \subsection*{1.0.1 (09-June-2015)}
+% \begin{itemize}
+%   \item fix \verb|\cdott|-related issues (thanks to Bruno Le Floch)
+%   \item fix some \verb|\SetBreakableRel| and \verb|\SetBreakableBin| declarations.
+% \end{itemize}
 % \subsection*{1.0 (02-June-2015)}
 % \begin{itemize}
 %   \item fix break after math operators (\verb|\sum|, \verb|\int|, etc.)
@@ -208,7 +203,8 @@
 %   \item fix hyphenation on~\verb|:=|
 %   \item correct work with 'icomma' package and option 'icomma' of 'eulervm' package
 %   \item correct work with 'program' package
-%   \item symbols have been added from boisik, euler, fourier, lucbmath, lucidabr, lucmin, lucmtime, luctime, mathbbol, mdwmath, sbbm, stmaryrd and wasysym packages.
+%   \item symbols have been added from boisik, euler, fourier, lucbmath, lucidabr,
+%    lucmin, lucmtime, luctime, mathbbol, mdwmath, sbbm, stmaryrd and wasysym packages.
 %   \item remove shrinking of space in math (breaked url package)
 %   \item don't hyphenate after punctuation ('\verb|,|', '\verb|;|', '\verb|\colon|' etc.)
 %   \item create broken commands as robust ones
