@@ -1,5 +1,5 @@
-rmathbr 1.0
-===========
+rmathbr 1.0.1
+=============
 
 Repeating of math operator at the broken line and the new line
 in inline equations (common in Cyrillic mathematical typography)
