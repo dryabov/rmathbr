@@ -799,7 +799,7 @@
   \else
     \let\@command=\relax
   \fi
-  \expandafter\@command{\rmathbr@arg}%
+  \@command{\rmathbr@arg}%
 }
 %    \end{macrocode}
 % \end{macro}
@@ -812,7 +812,7 @@
 \def\rmathbr@brokenglue#1#2#3%
 {
   \edef\rmathbr@temp{#1#2{#3}}
-  \expandafter\rmathbr@this{\rmathbr@temp}%
+  \rmathbr@this{\rmathbr@temp}%
 }
 %    \end{macrocode}
 % \end{macro}
@@ -822,7 +822,7 @@
 \def\rmathbr@brokenskiprelax#1#2%
 {
   \edef\rmathbr@temp{#1#2}
-  \expandafter\rmathbr@this{\rmathbr@temp}%
+  \rmathbr@this{\rmathbr@temp}%
 }
 %    \end{macrocode}
 % \end{macro}
