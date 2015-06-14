@@ -310,7 +310,7 @@
 % \begin{macro}{\SetMathOperator}
 % Disables breaks after math operator.
 %    \begin{macrocode}
-\def\SetMathOperator#1{\rmathbr@nobrafter{#1}}
+\def\SetMathOperator#1{\rmathbr@setbreakable{#1}{\rmathbr@mathop}}
 %    \end{macrocode}
 % \end{macro}
 %
@@ -702,6 +702,20 @@
 % \end{macro}
 %
 %
+% \begin{macro}{\rmathbr@mathop}
+%    \begin{macrocode}
+\def\rmathbr@mathop#1%
+{
+  \relax
+  \def\rmathbr@arg{#1}
+  \def\rmathbr@this{\rmathbr@mathop}
+  \def\rmathbr@output{\rmathbr@@mathop}
+  \futurelet\rmathbr@let@token\rmathbr@brokenop%
+}
+%    \end{macrocode}
+% \end{macro}
+%
+%
 % \begin{macro}{\rmathbr@@brokenbin}
 %    \begin{macrocode}
 \def\rmathbr@@brokenbin#1%
@@ -761,6 +775,18 @@
 %    \end{macrocode}
 % \end{macro}
 %
+%
+% \begin{macro}{\rmathbr@@mathop}
+%    \begin{macrocode}
+\def\rmathbr@@mathop#1%
+{
+  \rmathbr@setbrokens
+  #1\nobr %
+}
+%    \end{macrocode}
+% \end{macro}
+%
+%
 % \begin{macro}{\rmathbr@selector}
 %    \begin{macrocode}
 \def\rmathbr@selector#1%
@@ -791,11 +817,15 @@
       \let\@command=\rmathbr@brokenglue
     \else\ifx^\rmathbr@let@token
       \let\@command=\rmathbr@brokenglue
+    \else\ifx\limits\rmathbr@let@token
+      \let\@command=\rmathbr@brokenskip
+    \else\ifx\nolimits\rmathbr@let@token
+      \let\@command=\rmathbr@brokenskip
     \else\ifx\relax\rmathbr@let@token
-      \let\@command=\rmathbr@brokenskiprelax
+      \let\@command=\rmathbr@brokenskip
     \else
       \let\@command=\rmathbr@output
-    \fi\fi\fi\fi\fi
+    \fi\fi\fi\fi\fi\fi\fi
   \else
     \let\@command=\relax
   \fi
@@ -817,9 +847,9 @@
 %    \end{macrocode}
 % \end{macro}
 %
-% \begin{macro}{\rmathbr@brokenskiprelax}
+% \begin{macro}{\rmathbr@brokenskip}
 %    \begin{macrocode}
-\def\rmathbr@brokenskiprelax#1#2%
+\def\rmathbr@brokenskip#1#2%
 {
   \edef\rmathbr@temp{#1#2}
   \rmathbr@this{\rmathbr@temp}%
