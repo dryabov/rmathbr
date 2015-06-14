@@ -20,7 +20,7 @@
 %% 
 \NeedsTeXFormat{LaTeX2e}[1999/12/01]
 \ProvidesPackage{rmathbr}
-    [2015/06/09 1.0.1 Repeating of math operator at the broken line and the new line in inline equations]
+    [2015/06/14 1.0.1 Repeating of math operator at the broken line and the new line in inline equations]
 \RequirePackage{ifetex}
 \RequirePackage{mathstyle}
 \@ifpackageloaded{breqn}%
@@ -36,7 +36,7 @@
 \def\SetBreakableRel#1{\rmathbr@setbreakable{#1}{\brokenrel}}
 \def\SetBreakableInner#1{\rmathbr@setbreakable{#1}{\brokeninner}}
 \def\SetOpenBracket#1{\rmathbr@nobrafter{#1}}
-\def\SetMathOperator#1{\rmathbr@nobrafter{#1}}
+\def\SetMathOperator#1{\rmathbr@setbreakable{#1}{\rmathbr@mathop}}
 \def\SetPunctuation#1{\rmathbr@nobrafter{#1}}
 \DeclareRobustCommand{\brokenbin}[1]{\rmathbr@brokenbin{#1}}
 \DeclareRobustCommand{\brokenrel}[1]{\rmathbr@brokenrel{#1}}
@@ -315,6 +315,14 @@
   \def\rmathbr@output{\rmathbr@@brokeninner}
   \futurelet\rmathbr@let@token\rmathbr@brokenop%
 }
+\def\rmathbr@mathop#1%
+{
+  \relax
+  \def\rmathbr@arg{#1}
+  \def\rmathbr@this{\rmathbr@mathop}
+  \def\rmathbr@output{\rmathbr@@mathop}
+  \futurelet\rmathbr@let@token\rmathbr@brokenop%
+}
 \def\rmathbr@@brokenbin#1%
 {
   \ifnum\lastpenalty=\relpenalty
@@ -357,6 +365,11 @@
   \rmathbr@setbrokens
   \penalty\relpenalty %
 }
+\def\rmathbr@@mathop#1%
+{
+  \rmathbr@setbrokens
+  #1\nobr %
+}
 \def\rmathbr@selector#1%
 {
   \mathchoice
@@ -378,26 +391,30 @@
       \let\@command=\rmathbr@brokenglue
     \else\ifx^\rmathbr@let@token
       \let\@command=\rmathbr@brokenglue
+    \else\ifx\limits\rmathbr@let@token
+      \let\@command=\rmathbr@brokenskip
+    \else\ifx\nolimits\rmathbr@let@token
+      \let\@command=\rmathbr@brokenskip
     \else\ifx\relax\rmathbr@let@token
-      \let\@command=\rmathbr@brokenskiprelax
+      \let\@command=\rmathbr@brokenskip
     \else
       \let\@command=\rmathbr@output
-    \fi\fi\fi\fi\fi
+    \fi\fi\fi\fi\fi\fi\fi
   \else
     \let\@command=\relax
   \fi
-  \expandafter\@command{\rmathbr@arg}%
+  \@command{\rmathbr@arg}%
 }
 \endgroup
 \def\rmathbr@brokenglue#1#2#3%
 {
   \edef\rmathbr@temp{#1#2{#3}}
-  \expandafter\rmathbr@this{\rmathbr@temp}%
+  \rmathbr@this{\rmathbr@temp}%
 }
-\def\rmathbr@brokenskiprelax#1#2%
+\def\rmathbr@brokenskip#1#2%
 {
   \edef\rmathbr@temp{#1#2}
-  \expandafter\rmathbr@this{\rmathbr@temp}%
+  \rmathbr@this{\rmathbr@temp}%
 }
 \def\rmathbr@setbreakable#1#2%
 {
