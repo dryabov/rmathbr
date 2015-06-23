@@ -28,7 +28,7 @@
 %<package>\NeedsTeXFormat{LaTeX2e}[1999/12/01]
 %<package>\ProvidesPackage{rmathbr}
 %<*package>
-    [2015/06/14 1.0.1 Repeating of math operator at the broken line and the new line in inline equations]
+    [2015/06/23 1.0.2 Repeating of math operator at the broken line and the new line in inline equations]
 %</package>
 %
 %<*driver>
@@ -54,7 +54,7 @@
 %</driver>
 % \fi
 %
-% \CheckSum{3293}
+% \CheckSum{3299}
 %
 % \CharacterTable
 %  {Upper-case    \A\B\C\D\E\F\G\H\I\J\K\L\M\N\O\P\Q\R\S\T\U\V\W\X\Y\Z
@@ -183,6 +183,10 @@
 %
 % \section{Changelog}
 %
+% \subsection*{1.0.2 (23-June-2015)}
+% \begin{itemize}
+%   \item fix issue with expanding of math operators
+% \end{itemize}
 % \subsection*{1.0.1 (14-June-2015)}
 % \begin{itemize}
 %   \item fix \verb|\cdott|-related issues (thanks to Bruno Le Floch)
@@ -830,7 +834,7 @@
   \else
     \let\@command=\relax
   \fi
-  \@command{\rmathbr@arg}%
+  \expandafter\@command\expandafter{\rmathbr@arg}%
 }
 %    \end{macrocode}
 % \end{macro}
@@ -842,8 +846,8 @@
 %    \begin{macrocode}
 \def\rmathbr@brokenglue#1#2#3%
 {
-  \edef\rmathbr@temp{#1#2{#3}}
-  \rmathbr@this{\rmathbr@temp}%
+  \def\rmathbr@temp{#1#2{#3}}
+  \expandafter\rmathbr@this\expandafter{\rmathbr@temp}%
 }
 %    \end{macrocode}
 % \end{macro}
@@ -852,8 +856,8 @@
 %    \begin{macrocode}
 \def\rmathbr@brokenskip#1#2%
 {
-  \edef\rmathbr@temp{#1#2}
-  \rmathbr@this{\rmathbr@temp}%
+  \def\rmathbr@temp{#1#2}
+  \expandafter\rmathbr@this\expandafter{\rmathbr@temp}%
 }
 %    \end{macrocode}
 % \end{macro}

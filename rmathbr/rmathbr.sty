@@ -403,18 +403,18 @@
   \else
     \let\@command=\relax
   \fi
-  \@command{\rmathbr@arg}%
+  \expandafter\@command\expandafter{\rmathbr@arg}%
 }
 \endgroup
 \def\rmathbr@brokenglue#1#2#3%
 {
-  \edef\rmathbr@temp{#1#2{#3}}
-  \rmathbr@this{\rmathbr@temp}%
+  \def\rmathbr@temp{#1#2{#3}}
+  \expandafter\rmathbr@this\expandafter{\rmathbr@temp}%
 }
 \def\rmathbr@brokenskip#1#2%
 {
-  \edef\rmathbr@temp{#1#2}
-  \rmathbr@this{\rmathbr@temp}%
+  \def\rmathbr@temp{#1#2}
+  \expandafter\rmathbr@this\expandafter{\rmathbr@temp}%
 }
 \def\rmathbr@setbreakable#1#2%
 {
