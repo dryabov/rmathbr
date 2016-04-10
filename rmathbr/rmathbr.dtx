@@ -2,7 +2,7 @@
 % !Mode:: "TeX:DTX:UK"
 % !DTXversion:: "2.5a"
 %
-% Copyright (C) 2008-2015 by Denis Ryabov <dryabov@yandex.ru>
+% Copyright (C) 2008-2016 by Denis Ryabov <dryabov@yandex.ru>
 % ---------------------------------------------------------------------------
 % This work may be distributed and/or modified under the
 % conditions of the LaTeX Project Public License, either version 1.3
@@ -28,7 +28,7 @@
 %<package>\NeedsTeXFormat{LaTeX2e}[1999/12/01]
 %<package>\ProvidesPackage{rmathbr}
 %<*package>
-    [2015/06/23 1.0.2 Repeating of math operator at the broken line and the new line in inline equations]
+    [2016/04/10 1.0.3 Repeating of math operator at the broken line and the new line in inline equations]
 %</package>
 %
 %<*driver>
@@ -183,6 +183,11 @@
 %
 % \section{Changelog}
 %
+% \subsection*{1.0.3 (10-April-2016)}
+% \begin{itemize}
+%   \item fix issue with sub-/superscripts in \verb|\Biggl|, \verb|\biggl|,
+%    \verb|\Bigl|, \verb|\bigl|
+% \end{itemize}
 % \subsection*{1.0.2 (23-June-2015)}
 % \begin{itemize}
 %   \item fix issue with expanding of math operators
@@ -914,10 +919,10 @@
 %    \end{macrocode}
 % Open brackets.
 %    \begin{macrocode}
-\rmathbr@ReDeclareRobustCommandI{\bigl}{\mathopen\big#1\nobr}
-\rmathbr@ReDeclareRobustCommandI{\Bigl}{\mathopen\Big#1\nobr}
-\rmathbr@ReDeclareRobustCommandI{\biggl}{\mathopen\bigg#1\nobr}
-\rmathbr@ReDeclareRobustCommandI{\Biggl}{\mathopen\Bigg#1\nobr}
+\rmathbr@ReDeclareRobustCommandI{\bigl}{\rmathbr@mathop{\mathopen\big#1}}
+\rmathbr@ReDeclareRobustCommandI{\Bigl}{\rmathbr@mathop{\mathopen\Big#1}}
+\rmathbr@ReDeclareRobustCommandI{\biggl}{\rmathbr@mathop{\mathopen\bigg#1}}
+\rmathbr@ReDeclareRobustCommandI{\Biggl}{\rmathbr@mathop{\mathopen\Bigg#1}}
 \SetOpenBracket{\lmoustache}
 \SetOpenBracket{\langle}
 \SetOpenBracket{\lbrace}
