@@ -177,7 +177,6 @@
 %
 % \section{Known issues}
 % \begin{itemize}
-%   \item 'xy' package: should be loaded after 'rmathbr' to work properly
 %   \item 'breqn' package: cannot work together with 'rmathbr'
 %  \end{itemize}
 %
@@ -266,12 +265,6 @@
 \@ifpackageloaded{breqn}%
 {
   \PackageError{rmathbr}{'rmathbr' package cannot be used together with 'breqn' package!}{}%
-}{}
-%    \end{macrocode}
-%    \begin{macrocode}
-\@ifpackageloaded{xy}%
-{
-  \PackageError{rmathbr}{'rmathbr' package should be loaded before 'xy' package!}{}%
 }{}
 %    \end{macrocode}
 %
@@ -2237,6 +2230,19 @@
       #3}{#4}{#5}
   }
   \PackageInfo{rmathbr}{Note: 'bm' package has been patched}{}%
+}{}
+%    \end{macrocode}
+% Patch for xy package:
+%    \begin{macrocode}
+\@ifpackageloaded{xy}%
+{
+  \ifnum\rmathbr@scriptsmode>0\relax
+    \let\rmathbr@save@xy=\xy
+    \let\rmathbr@save@endxy=\endxy
+    \def\xy{\begingroup\catcode`\^7\catcode`\_8\rmathbr@save@xy}
+    \def\endxy{\rmathbr@save@endxy\endgroup}
+    \PackageInfo{rmathbr}{Note: \string\xy and \string\endxy commands from 'xy' package have been patched}{}%
+  \fi
 }{}
 %    \end{macrocode}
 %
