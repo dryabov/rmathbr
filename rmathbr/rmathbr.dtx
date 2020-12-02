@@ -2153,6 +2153,23 @@
   \SetBreakableRel{\logof}
 }{}
 %    \end{macrocode}
+% bm package
+%    \begin{macrocode}
+\@ifpackageloaded{bm}%
+{
+  \let\rmathbr@save@bm@general=\bm@general
+  \def\bm@general#1#2#3#4#5{
+    \rmathbr@save@bm@general{#1}{#2}{%
+      \let\nobr\copy
+      \def\brokenrel##1{\unvcopy{\brokenrel{##1}}}
+      \def\brokenbin##1{\unvcopy{\brokenbin{##1}}}
+      \def\brokeninner##1{\unvcopy{\brokeninner{##1}}}
+      \def\rmathbr@mathop##1{\unvcopy{\rmathbr@mathop{##1}}}
+      #3}{#4}{#5}
+  }
+  \PackageInfo{rmathbr}{Note: 'bm' package has been patched}{}%
+}{}
+%    \end{macrocode}
 %
 % \iffalse
 %</package>
