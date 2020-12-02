@@ -2207,8 +2207,32 @@
   \SetBreakableBin{\ocircle}
   \SetBreakableRel{\logof}
 }{}
+%    \end{macrocode}
+% mathtools/empheq
+%    \begin{macrocode}
+\@ifpackageloaded{mathtools}% mathtools/empheq
+{
+  \SetBreakableRel{\vcentcolon}
+  \SetBreakableRel{\dblcolon}
+  \SetBreakableRel{\coloneqq}
+  \SetBreakableRel{\Coloneqq}
+  \SetBreakableRel{\coloneq}
+  \SetBreakableRel{\Coloneq}
+  \SetBreakableRel{\eqqcolon}
+  \SetBreakableRel{\Eqqcolon}
+  \SetBreakableRel{\eqcolon}
+  \SetBreakableRel{\Eqcolon}
+  \SetBreakableRel{\colonapprox}
+  \SetBreakableRel{\Colonapprox}
+  \SetBreakableRel{\colonsim}
+  \SetBreakableRel{\Colonsim}
+}{}
+%    \end{macrocode}
 } % \rmathbr@patch@commands
+% \end{macro}
+%
 % Execute \verb|\rmathbr@patch@commands| depending on options:
+%    \begin{macrocode}
 \ifrmathbr@patch@begindocument
   \AtBeginDocument{\rmathbr@patch@commands}
 \else
