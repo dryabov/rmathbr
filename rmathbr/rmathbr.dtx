@@ -345,6 +345,59 @@
 \DeclareRobustCommand{\brokeninner}[1]{\rmathbr@brokeninner{#1}}
 %    \end{macrocode}
 %
+% \subsection*{Options}
+%
+% Warn about deprecated options:
+\DeclareOption{noactivechars}{
+  \PackageWarning{rmathbr}{Option 'noactivechars' is deprecated. Use 'noactivescripts' instead.}
+  \ExecuteOptions{noactivescripts}
+}
+\DeclareOption{mathactivechars}{%
+  \PackageWarning{rmathbr}{Option 'mathactivechars' is deprecated. Use 'mathactivescripts' instead.}
+  \ExecuteOptions{mathactivescripts}
+}
+\DeclareOption{activechars}{%
+  \PackageWarning{rmathbr}{Option 'activechars' is deprecated. Use 'activescripts' instead.}
+  \ExecuteOptions{activescripts}
+}
+% Save scripts mode for later usage:
+\let\rmathbr@scriptsmode=\@ne
+\DeclareOption{noactivescripts}{%
+  \let\rmathbr@scriptsmode=\z@
+ }
+\DeclareOption{mathactivescripts}{%
+  \let\rmathbr@scriptsmode=\@ne
+}
+\DeclareOption{activescripts}{%
+  \let\rmathbr@scriptsmode=\tw@
+}
+% The option to make \verb|\cdot| works like \verb|\cdott|:
+\newif\ifrmathbr@cdottimes
+\DeclareOption{cdottimes}{%
+  \rmathbr@cdottimestrue%
+}
+% Where to patch math commands, at the package loading or at the \verb|\begin{document}| (i.e.\ after other packages are loaded and set its macros):
+\newif\ifrmathbr@patch@begindocument
+% Note that by default 'atload' is used unless 'unicode-math' or 'mathtools' are loaded.
+\@ifpackageloaded{unicode-math}{\rmathbr@patch@begindocumenttrue}{}
+\@ifpackageloaded{mathtools}{\rmathbr@patch@begindocumenttrue}{}
+\DeclareOption{atload}{%
+  \rmathbr@patch@begindocumentfalse
+}
+\DeclareOption{atbegindocument}{%
+  \rmathbr@patch@begindocumenttrue
+}
+% Execute options
+\ProcessOptions
+% Switch to scripts mode
+\ifcase\rmathbr@scriptsmode
+  % nop
+\or
+  \AtBeginDocument{\catcode`\^=12\mathcode`\^=32768\catcode`\_=12\mathcode`\_=32768}
+\or
+  \AtBeginDocument{\catcode`\^\active\catcode`\_\active}
+\fi
+%
 % \subsection*{Implementation}
 %
 % Save default penalty to \verb|\exhyphenpenalty| (as \verb|\exhyphenpenalty| will be actual penalty for math breaks).
@@ -901,6 +954,12 @@
 %    \end{macrocode}
 % \end{macro}
 %
+% \begin{macro}{\rmathbr@nobrafter}
+%    \begin{macrocode}
+\def\rmathbr@patch@commands{
+%    \end{macrocode}
+% \end{macro}
+%
 % \subsection*{Redeclaration of math signs}
 %
 % Redeclare \verb|\not|.
@@ -1036,6 +1095,9 @@
     \rmathbr@cdott
   \fi
 }
+\ifrmathbr@cdottimes
+  \let\cdot\cdott
+\fi
 %    \end{macrocode}
 % \end{macro}
 %
@@ -2152,6 +2214,13 @@
   \SetBreakableBin{\ocircle}
   \SetBreakableRel{\logof}
 }{}
+} % \rmathbr@patch@commands
+% Execute \verb|\rmathbr@patch@commands| depending on options:
+\ifrmathbr@patch@begindocument
+  \AtBeginDocument{\rmathbr@patch@commands}
+\else
+  \rmathbr@patch@commands
+\fi
 %    \end{macrocode}
 % bm package
 %    \begin{macrocode}
