@@ -444,9 +444,9 @@
 \begingroup
   \catcode`\=\active
   \ifnum\mathcode`\=<32768
-    \xdef={\noexpand\brokenbin{\mathchar\number\mathcode`\=}}
+    \xdef={\noexpand\brokenrel{\mathchar\number\mathcode`\=}}
   \else
-    \gdef={\brokenbin{\mathchar12349}}
+    \gdef={\brokenrel{\mathchar12349}}
   \fi
 \endgroup
 \begingroup
@@ -476,18 +476,18 @@
 \begingroup
   \ifnum\mathcode`\<<32768
     \catcode`\<\active
-    \xdef<{\noexpand\brokenbin{\mathchar\number\mathcode`\<}}
+    \xdef<{\noexpand\brokenrel{\mathchar\number\mathcode`\<}}
   \else
     \catcode`\<\active
-    \gdef<{\brokenbin{\mathchar12604}}
+    \gdef<{\brokenrel{\mathchar12604}}
   \fi
 \endgroup
 \begingroup
   \catcode`\>\active
   \ifnum\mathcode`\><32768
-    \xdef>{\noexpand\brokenbin{\mathchar\number\mathcode`\>}}
+    \xdef>{\noexpand\brokenrel{\mathchar\number\mathcode`\>}}
   \else
-    \gdef>{\brokenbin{\mathchar12606}}
+    \gdef>{\brokenrel{\mathchar12606}}
   \fi
 \endgroup
 \begingroup
