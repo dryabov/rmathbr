@@ -1,10 +1,10 @@
-rmathbr 1.0.3
+rmathbr 1.1
 =============
 
 Repeating of math operator at the broken line and the new line
 in inline equations (common in Cyrillic mathematical typography)
 
-Copyright (C) 2008-2016 by Denis Ryabov <dryabov@yandex.ru>
+Copyright (C) 2008-2020 by Denis Ryabov <dryabov@yandex.ru>
 
 
 This work may be distributed and/or modified under the

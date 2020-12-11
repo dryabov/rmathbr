@@ -2,7 +2,7 @@
 % !Mode:: "TeX:DTX:UK"
 % !DTXversion:: "2.5a"
 %
-% Copyright (C) 2008-2016 by Denis Ryabov <dryabov@yandex.ru>
+% Copyright (C) 2008-2020 by Denis Ryabov <dryabov@yandex.ru>
 % ---------------------------------------------------------------------------
 % This work may be distributed and/or modified under the
 % conditions of the LaTeX Project Public License, either version 1.3
@@ -28,7 +28,8 @@
 %<package>\NeedsTeXFormat{LaTeX2e}[1999/12/01]
 %<package>\ProvidesPackage{rmathbr}
 %<*package>
-    [2016/04/10 1.0.3 Repeating of math operator at the broken line and the new line in inline equations]
+    [2020/12/11 1.1 Repeating of math operator at the broken line and the new
+                    line in inline equations]
 %</package>
 %
 %<*driver>
@@ -38,12 +39,15 @@
             pdfstartview=FitH,
             pdfpagelayout=OneColumn,
             pdfauthor={Denis Ryabov},
-            pdftitle={rmathbr : Repeating of math operator at the broken line and the new line in inline equations}]{hyperref}
+            pdftitle={rmathbr : Repeating of math operator at the broken line and
+                                the new line in inline equations}]{hyperref}
 \usepackage{enumitem}
 \usepackage{multicol}
+\usepackage{array,longtable}
 \usepackage{rmathbr}
 \setlist{nosep}
 \pagestyle{headings}
+\frenchspacing
 \sloppy
 \clubpenalty=10000
 \widowpenalty=10000
@@ -54,7 +58,7 @@
 %</driver>
 % \fi
 %
-% \CheckSum{3299}
+% \CheckSum{3823}
 %
 % \CharacterTable
 %  {Upper-case    \A\B\C\D\E\F\G\H\I\J\K\L\M\N\O\P\Q\R\S\T\U\V\W\X\Y\Z
@@ -87,13 +91,13 @@
 %
 % Repeating of math operator at the broken line and the new line in inline
 % equations is used in Cyrillic mathematical typography (Russian for example),
-% but unfortunately \LaTeX{} doesn't provide such an option. There was an attempt
+% but unfortunately, \LaTeX{} doesn't provide such an option. There was an attempt
 % to do it many years ago [see M.I.~Grinchuk ``TeX and Russian Traditions of
 % Typesetting'', TUGboat 17(4) (1996) 385], but there was no ready to use package.
 %
-% This package extends ideas described in ``TeX and Russian Traditions of
-% Typesetting'' and supports most of \LaTeX{} mathematical packages (some known
-% issues are listed in ``Known issues'' section below).
+% This package extends ideas described in the ``TeX and Russian Traditions of
+% Typesetting'' and supports most of \LaTeX's mathematical packages (some known
+% issues are listed in the ``Known issues'' section below).
 %
 %
 % \section{Usage}
@@ -107,27 +111,74 @@
 % $t_1t_2\cos\theta=\vec t_1\cdot\vec t_2$, $x=12\cdott 3\cdott 10^3$.
 % \end{multicols}
 %
-% It's recommended to load \textsf{rmathbr} after other packages, because of \textsf{rmathbr} has
-% special support of many math-related packages: amsfonts, amssymb, amstex,
-% boisik, euler, eulervm, fourier, icomma, latexsym, lucbmath, lucidabr, lucmin,
-% lucmtime, luctime, mathbbol, mdwmath, program, sbbm, stmaryrd, wasysym.
+% It's recommended to load \textsf{rmathbr} after other packages because
+% \textsf{rmathbr} has special support of many math-related packages:
+% \textsf{amsfonts}, \textsf{amssymb}, \textsf{amstex}, \textsf{bm},
+% \textsf{boisik}, \textsf{euler}, \textsf{eulervm}, \textsf{fourier},
+% \textsf{icomma}, \textsf{latexsym}, \textsf{lucbmath}, \textsf{lucidabr},
+% \textsf{lucmin}, \textsf{lucmtime}, \textsf{luctime}, \textsf{mathbbol},
+% \textsf{mathtools}, \textsf{mdwmath}, \textsf{program}, \textsf{sbbm},
+% \textsf{stmaryrd}, \textsf{wasysym}, \textsf{xy}.
 %
 % Please, submit any found bugs to \url{https://github.com/dryabov/rmathbr/issues}.
 %
 % \section{Options}
 %
-% The \textsf{rmathbr} package supports following options:
-% \begin{itemize}
-% \item \verb|mathactivechars| (default): assign mathactive (12) category to
-%       \verb|^| and \verb|_| characters.
-% \item \verb|activechars|: assign active (13) category to \verb|^| and
-%       \verb|_| characters.
-% \item \verb|noactivechars|: assign default categories to \verb|^| and
-%       \verb|_| characters (7 and 8, correspondingly).
-% \end{itemize}
+% Some aspects of the \textsf{rmathbr} can be altered using package options.
+% In most cases, it should be sufficient to load the package without extra
+% options, but sometimes it may be necessary to change default options for
+% compatibility with other packages.
 %
-% In some cases it might be necessary to change default option for compatibility
-% with other packages.
+% The ``key=value'' scheme is used with the following possible options (default
+% value is printed in italics):
+%
+% \begin{longtable}{>{\texttt}l>{\raggedright}p{2.5cm}p{6.5cm}}
+% |script| & noactive\par\textit{mathactive}\par active &
+%         This option declares what way \textsf{rmathbr} will affect |_| and |^|
+%         commands (sub- and superscripts). In the ``noactive'' mode, they have
+%         default \TeX{} behavior, but it may be necessary to manually wrap some
+%         indices into curly brackets, e.g. |A^{\star}| instead of just
+%         a |A^\star|. In the ``mathactive'' mode, both |_| and |^| become
+%         commands in math mode that process arguments properly, and extra
+%         wrapping is unnecessary. And in the ``active'' mode these commands can
+%         be used for scripts even in the text mode (e.g. |H_2O|). \\
+% |run| & atload\par atbegindocument\par\textit{auto} &
+%         This option declares when to affect math commands for hyphenation,
+%         directly at package loading time, or later at the |\begin{document}|.
+%         The latter is necessary to deal with packages that declare math symbols
+%         at the |\begin{document}|. The ``auto'' value allows to switch to the
+%         ``atbegindocument'' mode automatically (currently, if
+%         \textsf{unicode-math} or \textsf{mathtools} packages are loaded). \\
+% |cdottimes|   & true\par\textit{false} &
+%         Re-declare \verb|\cdot| command as \verb|\cdott| (see \verb|\cdott|
+%         description below) to hyphenate it using the \verb|\times| character.
+%         By default, it is disabled because \verb|\cdot| is also used for scalar
+%         products (e.g. $\vec a\cdot\vec b$), and in this case, it is wrong to
+%         replace it with \verb|\times| on break, because \verb|\times| is usually
+%         used for cross products. \\
+% |brokencolon| & true\par\textit{false} &
+%         According to Russian typography traditions, math expression shouldn't be
+%         broken on the division character (|:|). But if you like to allow it,
+%         just set this option to true. \\
+% |brokenminus| & \textit{true}\par false &
+%         Usually, it's allowed to break math expression on the ``minus''
+%         character, but it's possible to disable it. \\
+% |brokenbin|   & true\par\textit{false} &
+%         This option disables breaks on binary operations (keeping relations
+%         only). See also |\BrokenBinOff| and |\BrokenBinOn| macros. \\
+% \end{longtable}%
+%
+% Internally, |scripts=mathactive| assigns the mathactive (12) category to
+% \verb|^| and \verb|_| characters, |scripts=active| assigns the active (13)
+% category, and |scripts=noactive| keeps default categories to \verb|^| and
+% \verb|_| characters (7 and 8, correspondingly).
+%
+% For backward compatibility, \textsf{rmathbr} supports
+% the |noactivechars| option as an alias for |scripts=noactive|,
+% the |mathactivechars| option as an alias for |scripts=mathactive|, and
+% the |activechars| option as an alias for |scripts=active|. These options are
+% deprecated, and it's recommended to switch to the corresponding |script| option.
+%
 %
 %
 % \section{Macros}
@@ -135,25 +186,25 @@
 % \DescribeMacro{\*}
 %
 % Macro \verb|\*| is used to mark multiplication point that is invisible and
-% changed to $\times$ at break only. E.g. \verb|(a+b)\*(a-b)|.
+% changed to $\times$ at the break only. E.g. \verb|(a+b)\*(a-b)|.
 %
 % \DescribeMacro{\cdott}
 %
-% This command displays \verb|\cdot| ($\cdot$) that is changed to
-% \verb|\times| ($\times$) at break.
+% This command displays \verb|\cdot| ($\cdot$) that is changed to \verb|\times|
+% ($\times$) at the break.
 %
 % \DescribeMacro{\nobr}
 %
 % This command is used to prevent break expression on the following math
 % operator. E.g. \verb|a\nobr-b|.
 %
-% \DescribeMacro{\SetBreakableBin}
-%
-% Declares breakable binary operator, e.g. \verb|\SetBreakableBin{\MyPlus}|.
-%
 % \DescribeMacro{\SetBreakableRel}
 %
 % Declares breakable relation operator, e.g. \verb|\SetBreakableRel{\MyEqual}|.
+%
+% \DescribeMacro{\SetBreakableBin}
+%
+% Declares breakable binary operator, e.g. \verb|\SetBreakableBin{\MyPlus}|.
 %
 % \DescribeMacro{\SetBreakableInner}
 %
@@ -161,27 +212,63 @@
 %
 % \DescribeMacro{\SetOpenBracket}
 %
-% Declares opening bracket (\textsf{rmathbr} disables break directly after brackets),
-% e.g. \verb|\SetOpenBracket{\MyOpenBracket}|.
+% Declares opening bracket (\textsf{rmathbr} disables break directly after
+% brackets), e.g. \verb|\SetOpenBracket{\MyOpenBracket}|.
 %
 % \DescribeMacro{\SetMathOperator}
 %
-% Declares math operator (\textsf{rmathbr} disables break directly after operators),
-% e.g. \verb|\SetMathOperator{\MySum}|.
+% Declares math operator (\textsf{rmathbr} disables break directly after
+% operators), e.g. \verb|\SetMathOperator{\MySum}|.
 %
 % \DescribeMacro{\SetPunctuation}
 %
-% Declares punctuation command (\textsf{rmathbr} disables break directly after punctuation),
+% Declares punctuation command (\textsf{rmathbr} disables break directly after
+% punctuation to prevent break and duplication in the case like \verb|$1,-1$|),
 % e.g. \verb|\SetPunctuation{\MyColon}|.
+%
+% \DescribeMacro{\UnsetBrokenCmd}
+%
+% Restores original command, e.g. to avoid potential issues or conflicts with
+% other packages. Usage example: \verb|\UnsetBrokenCmd{\cdot}| to disable break on
+% \verb|\cdot|. Note that in the case of |run=atbegindocument| (or |auto|) this
+% command should be used after \verb|\begin{document}|.
+%
+% \DescribeMacro{\BrokenBinOff}
+%
+% Disables break on binary operations, see also |brokenbin=false| option.
+%
+% \DescribeMacro{\BrokenBinOn}
+%
+% Enables break on binary operations.
+%
 %
 %
 % \section{Known issues}
 % \begin{itemize}
-%   \item 'breqn' package: cannot work together with 'rmathbr'
+%   \item \textsf{breqn} package: cannot work together with \textsf{rmathbr} (as
+%         \textsf{breqn} redefines all the math in \TeX)
 %  \end{itemize}
 %
 % \section{Changelog}
 %
+% \subsection*{1.1 (11-December-2020)}
+% \begin{itemize}
+%   \item add support of XeTeX/LuaTeX and \textsf{unicode-math} package
+%   \item add new key-value options (|script|, |run|, |cdottimes|, |brokenminus|,
+%         |brokencolon|, |brokenbin|)
+%   \item add new commands (\verb|\UnsetBrokenCmd|, \verb|\BrokenBinOff| and
+%         \verb|\BrokenBinOn|)
+%   \item add support of \textsf{mathtools} package
+%   \item add a patch for \textsf{bm} package
+%   \item add a patch for \textsf{xy} package
+%   \item remove dependence on \textsf{mathstyle} package
+%   \item fix math class for \verb|=|, \verb|<|, \verb|>| (\verb|\mathrel| instead
+%         of \verb|\mathbin|)
+%   \item fix math class for \verb|:| (\verb|\mathbin| instead of \verb|\mathrel|)
+%   \item fix processing of colon-related commands (e.g. \verb|\coloneq| from
+%         \textsf{mathtools}, etc.)
+%   \item performance optimizations
+% \end{itemize}
 % \subsection*{1.0.3 (10-April-2016)}
 % \begin{itemize}
 %   \item fix issue with sub-/superscripts in \verb|\Biggl|, \verb|\biggl|,
@@ -210,31 +297,38 @@
 % \subsection*{0.98 (31-January-2010)}
 % \begin{itemize}
 %   \item fix hyphenation on~\verb|:=|
-%   \item correct work with 'icomma' package and option 'icomma' of 'eulervm' package
-%   \item correct work with 'program' package
-%   \item symbols have been added from boisik, euler, fourier, lucbmath, lucidabr,
-%    lucmin, lucmtime, luctime, mathbbol, mdwmath, sbbm, stmaryrd and wasysym packages.
-%   \item remove shrinking of space in math (breaked url package)
-%   \item don't hyphenate after punctuation ('\verb|,|', '\verb|;|', '\verb|\colon|' etc.)
+%   \item correct work with \textsf{icomma} package and
+%         option \verb|[icomma]| of \textsf{eulervm} package
+%   \item correct work with \textsf{program} package
+%   \item symbols have been added from \textsf{boisik}, \textsf{euler},
+%         \textsf{fourier}, \textsf{lucbmath}, \textsf{lucidabr}, \textsf{lucmin},
+%         \textsf{lucmtime}, \textsf{luctime}, \textsf{mathbbol},
+%         \textsf{mdwmath}, \textsf{sbbm}, \textsf{stmaryrd}, and \textsf{wasysym}
+%         packages.
+%   \item remove shrinking of space in math (breaked \textsf{url} package)
+%   \item don't hyphenate after punctuation (``\verb|,|'', ``\verb|;|'',
+%         ``\verb|\colon|'' etc.)
 %   \item create broken commands as robust ones
 %   \item some fixes of redeclaring of AMS commands
-%   \item commented hyphenation on \verb|\ldots| and \verb|\cdots|, as \TeX doesn't break here
+%   \item commented hyphenation on \verb|\ldots| and \verb|\cdots|, as \TeX{}
+%         doesn't break here
 % \end{itemize}
 % \subsection*{0.97 (08-October-2009)}
 % \begin{itemize}
-%   \item fix problem with operators like '\verb|+^\leq|'
+%   \item fix problem with operators like ``\verb|+^\leq|''
 % \end{itemize}
 % \subsection*{0.96 (29-September-2009)}
 % \begin{itemize}
-%   \item fix problem with '\verb|-|' in AMS's \verb|\DeclareMathOperator|
+%   \item fix problem with ``\verb|-|'' in AMS's \verb|\DeclareMathOperator|
 %   \item fix problem with \verb|\ldots| in text mode
 % \end{itemize}
 % \subsection*{0.95 (28-September-2009)}
 % \begin{itemize}
 %   \item fix problem with sub/sup-scripts after relations
 %   \item fix hyphenation on \verb|\ldots|
-%   \item AMS/Lucida left brackets (\verb|\lvert|, \verb|\lVert|, \verb|\ulcorner|, \verb|\llcorner|) support
-%   \item mathbbol.sty left bracket (\verb|\Lbrack|) support
+%   \item AMS/Lucida left brackets (\verb|\lvert|, \verb|\lVert|,
+%         \verb|\ulcorner|, \verb|\llcorner|) support
+%   \item \textsf{mathbbol} left bracket (\verb|\Lbrack|) support
 %   \item huge code refactoring
 % \end{itemize}
 % \subsection*{0.91 (21-September-2009)}
@@ -255,18 +349,44 @@
 %<*package>
 % \fi
 %
+%
 % \subsection*{Initialization}
 %
+% Load required packages.
 %    \begin{macrocode}
 \RequirePackage{ifetex}
-\RequirePackage{mathstyle}
+\RequirePackage{ifluatex}
+\RequirePackage{xkeyval}
 %    \end{macrocode}
+% \begin{macro}{\rmathbr@kv}
 %    \begin{macrocode}
-\@ifpackageloaded{breqn}%
-{
+\edef\rmathbr@kv{\@currname.\@currext}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\xDeclareBoolOptionX}
+% The macro to declare boolean option.
+%    \begin{macrocode}
+\def\xDeclareBoolOptionX#1#2{%
+  \define@boolkey{\rmathbr@kv}[rmathbr@kv@]{#1}[true]{#2}%
+}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\xDeclareChoiceOptionX}
+% The macro to declare multi-choice option.
+%    \begin{macrocode}
+\def\xDeclareChoiceOptionX#1[#2]#3[#4]#5{%
+  \define@choicekey{\rmathbr@kv}{#1}[#2]{#3}[#4]{#5}%
+}
+%    \end{macrocode}
+% \end{macro}
+%
+% Warn about known issues.
+%    \begin{macrocode}
+\@ifpackageloaded{breqn}{%
   \PackageError{rmathbr}{'rmathbr' package cannot be used together with 'breqn' package!}{}%
 }{}
 %    \end{macrocode}
+%
 %
 % \subsection*{Interface}
 %
@@ -277,112 +397,191 @@
 %    \end{macrocode}
 % \end{macro}
 %
-%
-% \begin{macro}{\SetBreakableBin}
-% Makes breakable binary operation.
-%    \begin{macrocode}
-\def\SetBreakableBin#1{\rmathbr@setbreakable{#1}{\brokenbin}}
-%    \end{macrocode}
-% \end{macro}
-%
-%
 % \begin{macro}{\SetBreakableRel}
 % Makes breakable relation sign.
 %    \begin{macrocode}
 \def\SetBreakableRel#1{\rmathbr@setbreakable{#1}{\brokenrel}}
 %    \end{macrocode}
 % \end{macro}
-%
-%
+% \begin{macro}{\SetBreakableBin}
+% Makes breakable binary operation.
+%    \begin{macrocode}
+\def\SetBreakableBin#1{\rmathbr@setbreakable{#1}{\brokenbin}}
+%    \end{macrocode}
+% \end{macro}
 % \begin{macro}{\SetBreakableInner}
 % Makes breakable inner (like \verb|\ldots|).
 %    \begin{macrocode}
 \def\SetBreakableInner#1{\rmathbr@setbreakable{#1}{\brokeninner}}
 %    \end{macrocode}
 % \end{macro}
-%
-%
 % \begin{macro}{\SetOpenBracket}
 % Disables breaks after open bracket.
 %    \begin{macrocode}
 \def\SetOpenBracket#1{\rmathbr@nobrafter{#1}}
 %    \end{macrocode}
 % \end{macro}
-%
-%
-% \begin{macro}{\SetMathOperator}
-% Disables breaks after math operator.
-%    \begin{macrocode}
-\def\SetMathOperator#1{\rmathbr@setbreakable{#1}{\rmathbr@mathop}}
-%    \end{macrocode}
-% \end{macro}
-%
-%
 % \begin{macro}{\SetPunctuation}
 % Disables breaks after punctuation sign.
 %    \begin{macrocode}
 \def\SetPunctuation#1{\rmathbr@nobrafter{#1}}
 %    \end{macrocode}
 % \end{macro}
-%
-% \noindent Makes argument as breakable binary operation.
+% \begin{macro}{\SetMathOperator}
+% Disables breaks after math operator.
 %    \begin{macrocode}
-\DeclareRobustCommand{\brokenbin}[1]{\rmathbr@brokenbin{#1}}
+\def\SetMathOperator#1{\rmathbr@setbreakable{#1}{\rmathbr@mathop}}
 %    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\UnsetBrokenCmd}
+% Restores original command.
+%    \begin{macrocode}
+\def\UnsetBrokenCmd#1{\rmathbr@unsetbroken{#1}}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\BrokenBinOff}
+% Disables break on binary operations.
+%    \begin{macrocode}
+\def\BrokenBinOff{\rmathbr@brokenbinoff}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\BrokenBinOn}
+% Enables break on binary operations.
+%    \begin{macrocode}
+\def\BrokenBinOn{\rmathbr@brokenbinon}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\brokenrel}
 % Makes argument as breakable relation sign.
 %    \begin{macrocode}
 \DeclareRobustCommand{\brokenrel}[1]{\rmathbr@brokenrel{#1}}
 %    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\brokenbin}
+% Makes argument as breakable binary operation.
+%    \begin{macrocode}
+\DeclareRobustCommand{\brokenbin}[1]{\rmathbr@brokenbin{#1}}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\brokeninner}
 % Makes argument as breakable inner.
 %    \begin{macrocode}
 \DeclareRobustCommand{\brokeninner}[1]{\rmathbr@brokeninner{#1}}
 %    \end{macrocode}
+% \end{macro}
+%
 %
 % \subsection*{Options}
 %
-% Warn about deprecated options:
-\DeclareOption{noactivechars}{
-  \PackageWarning{rmathbr}{Option 'noactivechars' is deprecated. Use 'noactivescripts' instead.}
-  \ExecuteOptions{noactivescripts}
+% Start to process options.
+%
+% First of all, warn about deprecated options:
+%    \begin{macrocode}
+\xDeclareBoolOptionX{noactivechars}{
+  \ifrmathbr@kv@noactivechars
+    \PackageWarning{rmathbr}{^^J Option 'noactivechars' is deprecated.^^J
+                             Use 'scripts=noactive' instead.^^J}
+    \ExecuteOptionsX{scripts=noactive}
+  \fi
 }
-\DeclareOption{mathactivechars}{%
-  \PackageWarning{rmathbr}{Option 'mathactivechars' is deprecated. Use 'mathactivescripts' instead.}
-  \ExecuteOptions{mathactivescripts}
+%    \end{macrocode}
+%    \begin{macrocode}
+\xDeclareBoolOptionX{mathactivechars}{
+  \ifrmathbr@kv@mathactivechars
+    \PackageWarning{rmathbr}{^^J Option 'mathactivechars' is deprecated.^^J
+                             Use 'scripts=mathactive' instead.^^J}
+    \ExecuteOptionsX{scripts=mathactive}
+  \fi
 }
-\DeclareOption{activechars}{%
-  \PackageWarning{rmathbr}{Option 'activechars' is deprecated. Use 'activescripts' instead.}
-  \ExecuteOptions{activescripts}
+%    \end{macrocode}
+%    \begin{macrocode}
+\xDeclareBoolOptionX{activechars}{
+  \ifrmathbr@kv@activechars
+    \PackageWarning{rmathbr}{^^J Option 'activechars' is deprecated.^^J
+                             Use 'scripts=active' instead.^^J}
+    \ExecuteOptionsX{scripts=active}
+  \fi
 }
-% Save scripts mode for later usage:
+%    \end{macrocode}
+%
+% Process |script| option:
+%    \begin{macrocode}
 \let\rmathbr@scriptsmode=\@ne
-\DeclareOption{noactivescripts}{%
-  \let\rmathbr@scriptsmode=\z@
- }
-\DeclareOption{mathactivescripts}{%
-  \let\rmathbr@scriptsmode=\@ne
+%    \end{macrocode}
+%    \begin{macrocode}
+\xDeclareChoiceOptionX{scripts}[\val\nr]{noactive,mathactive,active}[mathactive]{
+  \ifcase\nr\relax
+    \let\rmathbr@scriptsmode=\z@
+  \or
+    \let\rmathbr@scriptsmode=\@ne
+  \or
+    \let\rmathbr@scriptsmode=\tw@
+  \fi
 }
-\DeclareOption{activescripts}{%
-  \let\rmathbr@scriptsmode=\tw@
-}
-% The option to make \verb|\cdot| works like \verb|\cdott|:
-\newif\ifrmathbr@cdottimes
-\DeclareOption{cdottimes}{%
-  \rmathbr@cdottimestrue%
-}
-% Where to patch math commands, at the package loading or at the \verb|\begin{document}| (i.e.\ after other packages are loaded and set its macros):
+%    \end{macrocode}
+%
+% Set when to patch math commands, at the package loading or at the
+% \verb|\begin{document}| (i.e.\ after other packages are loaded and set its
+% macros):
+%    \begin{macrocode}
 \newif\ifrmathbr@patch@begindocument
-% Note that by default 'atload' is used unless 'unicode-math' or 'mathtools' are loaded.
-\@ifpackageloaded{unicode-math}{\rmathbr@patch@begindocumenttrue}{}
-\@ifpackageloaded{mathtools}{\rmathbr@patch@begindocumenttrue}{}
-\DeclareOption{atload}{%
-  \rmathbr@patch@begindocumentfalse
+%    \end{macrocode}
+% Note that by default 'atload' is used unless 'unicode-math' or 'mathtools' are
+% loaded.
+%    \begin{macrocode}
+\xDeclareChoiceOptionX{run}[\val\nr]{atload,atbegindocument,auto}[auto]{
+  \ifcase\nr\relax
+    \rmathbr@patch@begindocumentfalse
+  \or
+    \rmathbr@patch@begindocumenttrue
+  \or
+    \@ifpackageloaded{unicode-math}{\rmathbr@patch@begindocumenttrue}{}
+    \@ifpackageloaded{mathtools}{\rmathbr@patch@begindocumenttrue}{}
+  \fi
 }
-\DeclareOption{atbegindocument}{%
-  \rmathbr@patch@begindocumenttrue
+%    \end{macrocode}
+%
+% The option to make \verb|\cdot| works like \verb|\cdott|:
+%    \begin{macrocode}
+\xDeclareBoolOptionX{cdottimes}{}
+%    \end{macrocode}
+%
+% Other options (see documentation):
+%    \begin{macrocode}
+\xDeclareBoolOptionX{brokenminus}{}
+%    \end{macrocode}
+%    \begin{macrocode}
+\xDeclareBoolOptionX{brokencolon}{}
+%    \end{macrocode}
+%    \begin{macrocode}
+\xDeclareBoolOptionX{brokenbin}{%
+  \ifrmathbr@kv@brokenbin
+  \else
+    \AtBeginDocument{\BrokenBinOff}
+  \fi
 }
-% Execute options
-\ProcessOptions
+%    \end{macrocode}
+%
+% Default values:
+%    \begin{macrocode}
+\ExecuteOptionsX{scripts=mathactive}
+\ExecuteOptionsX{run=auto}
+\ExecuteOptionsX{cdottimes=false}
+\ExecuteOptionsX{brokenminus=true}
+\ExecuteOptionsX{brokencolon=false}
+\ExecuteOptionsX{brokenbin=true}
+%    \end{macrocode}
+%
+% Execute options:
+%    \begin{macrocode}
+\ProcessOptionsX
+%    \end{macrocode}
+%
+%
+% \subsection*{Implementation}
+%
 % Switch to scripts mode
+%    \begin{macrocode}
 \ifcase\rmathbr@scriptsmode
   % nop
 \or
@@ -390,399 +589,433 @@
 \or
   \AtBeginDocument{\catcode`\^\active\catcode`\_\active}
 \fi
-%
-% \subsection*{Implementation}
-%
-% Save default penalty to \verb|\exhyphenpenalty| (as \verb|\exhyphenpenalty| will be actual penalty for math breaks).
-%    \begin{macrocode}
-\exhyphenpenalty=\relpenalty
 %    \end{macrocode}
+%
+% Store original penalty values (via mathchardef trick).
+%    \begin{macrocode}
+\mathchardef\rmathbr@orig@relpenalty=\relpenalty
+\mathchardef\rmathbr@orig@binoppenalty=\binoppenalty
+%    \end{macrocode}
+%
+% Independent hyphen penalties are supported by LuaTeX only. That's why we save
+% default penalty to \verb|\exhyphenpenalty| (as \verb|\exhyphenpenalty| will
+% be actual penalty for math breaks in \TeX{} and XeTeX).
+%    \begin{macrocode}
+\ifluatex\else
+  \exhyphenpenalty=\relpenalty
+\fi
+%    \end{macrocode}
+%
 % Disable default breaks.
 %    \begin{macrocode}
 \relpenalty=13131
 \binoppenalty=14141
 %    \end{macrocode}
-% First symbol in equation is nonbreakable.
+% \begin{macro}{\everymath}
+% First symbol/command in equation is nonbreakable.
 %    \begin{macrocode}
 \expandafter\everymath\expandafter{\the\everymath\nobr }
 %    \end{macrocode}
-% Setup sub- and superscripts.
+% \end{macro}
+% Save some characters definitions.
+% \begin{macro}{\rmathbr@superscript@std}
 %    \begin{macrocode}
-\ifnum\catcode`\^=12%
-  \begingroup%
-    \catcode`\^\active
-    \global\let\rmathbr@superscript@text=^%
-  \endgroup%
-\else%
-  \let\rmathbr@superscript@text=^%
-\fi
-\ifnum\catcode`\_=12%
-  \begingroup%
-    \catcode`\_\active
-    \global\let\rmathbr@subscript@text=_%
-  \endgroup%
-\else%
-  \let\rmathbr@subscript@text=_%
-\fi
+\begingroup\catcode`\^=7 \global\let\rmathbr@superscript@std=^\endgroup
 %    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\rmathbr@superscript@other}
+%    \begin{macrocode}
+\begingroup\catcode`\^=12\global\let\rmathbr@superscript@other=^\endgroup
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\rmathbr@subscript@std}
+%    \begin{macrocode}
+\begingroup\catcode`\_=8 \global\let\rmathbr@subscript@std=_\endgroup
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\rmathbr@subscript@other}
+%    \begin{macrocode}
+\begingroup\catcode`\_=12\global\let\rmathbr@subscript@other=_\endgroup
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\rmathbr@prime}
+%    \begin{macrocode}
+\begingroup\catcode`\'=12\global\let\rmathbr@prime='\endgroup
+%    \end{macrocode}
+% \end{macro}
 %
 % \begin{macro}{\rmathbr@superscript}
 %    \begin{macrocode}
-\def\rmathbr@superscript#1{\rmathbr@superscript@text{{#1}}}
+\def\rmathbr@superscript#1{\rmathbr@superscript@std{{#1}}}
 %    \end{macrocode}
 % \end{macro}
-%
-%
 % \begin{macro}{\rmathbr@subscript}
 %    \begin{macrocode}
-\def\rmathbr@subscript#1{\rmathbr@subscript@text{{#1}}}
+\def\rmathbr@subscript#1{\rmathbr@subscript@std{{#1}}}
 %    \end{macrocode}
 % \end{macro}
 %
+% Setup sub- and superscripts.
 %    \begin{macrocode}
 \begingroup
   \catcode`\^\active\gdef^{\rmathbr@superscript}
   \catcode`\_\active\gdef_{\rmathbr@subscript}
 \endgroup
 %    \end{macrocode}
-% Save existing commands.
-%    \begin{macrocode}
-\begingroup\catcode`\_=13\catcode`\^=13\lowercase{\endgroup
-\AtBeginDocument%
-{%
-  \ifnum\catcode`\^=13
-    \let\rmathbr@superscript@text@active=^
-    \DeclareRobustCommand{\rmathbrsuperscript}[1]{\rmathbr@superscript@text@active{{#1}}}
-  \else
-    \DeclareRobustCommand{\rmathbrsuperscript}[1]{\rmathbr@superscript@text{{#1}}}
-  \fi
-  \def^{\rmathbrsuperscript}
-  \def\rmathbr@superscript@macro{\rmathbrsuperscript}
-  \ifnum\catcode`\_=13
-    \let\rmathbr@subscript@text@active=_
-    \DeclareRobustCommand{\rmathbrsubscript}[1]{\rmathbr@subscript@text@active{{#1}}}
-  \else
-    \DeclareRobustCommand{\rmathbrsubscript}[1]{\rmathbr@subscript@text{{#1}}}
-  \fi
-  \def_{\rmathbrsubscript}
-  \def\rmathbr@subscript@macro{\rmathbrsubscript}
-}}
-%    \end{macrocode}
-% Process options.
-%    \begin{macrocode}
-\DeclareOption{mathactivechars}%
-{
-  \catcode`\^=12\catcode`\_=12
-}
-\DeclareOption{activechars}%
-{
-  \catcode`\^\active\catcode`\_\active
-}
-\DeclareOption{noactivechars}%
-{
-  \catcode`\^=7\catcode`\_=8
-}
-\ExecuteOptions{mathactivechars}%
-\ProcessOptions
-%    \end{macrocode}
-% Basic math.
-%    \begin{macrocode}
-\begingroup
-  \catcode`\=\active
-  \ifnum\mathcode`\=<32768
-    \xdef={\noexpand\brokenrel{\mathchar\number\mathcode`\=}}
-  \else
-    \gdef={\brokenrel{\mathchar12349}}
-  \fi
-\endgroup
-\begingroup
-  \catcode`\+\active
-  \ifnum\mathcode`\+<32768
-    \xdef+{\noexpand\brokenbin{\mathchar\number\mathcode`\+}}
-  \else
-    \gdef+{\brokenbin{\mathchar8235}}
-  \fi
-\endgroup
-\begingroup
-  \catcode`\-\active
-  \ifnum\mathcode`\-<32768
-    \xdef-{\noexpand\brokenbin{\mathchar\number\mathcode`\-}}
-  \else
-    \gdef-{\brokenbin{\mathchar8704}}
-  \fi
-\endgroup
-\begingroup
-  \catcode`\*\active
-  \ifnum\mathcode`\*<32768
-    \xdef*{\noexpand\brokenbin{\mathchar\number\mathcode`\*}}
-  \else
-    \gdef*{\brokenbin{\mathchar8707}}
-  \fi
-\endgroup
-\begingroup
-  \ifnum\mathcode`\<<32768
-    \catcode`\<\active
-    \xdef<{\noexpand\brokenrel{\mathchar\number\mathcode`\<}}
-  \else
-    \catcode`\<\active
-    \gdef<{\brokenrel{\mathchar12604}}
-  \fi
-\endgroup
-\begingroup
-  \catcode`\>\active
-  \ifnum\mathcode`\><32768
-    \xdef>{\noexpand\brokenrel{\mathchar\number\mathcode`\>}}
-  \else
-    \gdef>{\brokenrel{\mathchar12606}}
-  \fi
-\endgroup
-\begingroup
-  \catcode`\(\active
-  \xdef({\mathopen\delimiter\number\delcode`\(\noexpand\nobr }
-\endgroup
-\begingroup
-  \catcode`\[\active %\]
-  \xdef[{\mathopen\delimiter\number\delcode`\[\noexpand\nobr }
-\endgroup
-\AtBeginDocument%
-{
-  \mathcode`\==32768% "8000
-  \mathcode`\<=32768
-  \mathcode`\>=32768
-  \mathcode`\+=32768
-  \mathcode`\-=32768
-  \mathcode`\*=32768
-  \mathcode`\_=32768
-  \mathcode`\^=32768
-  \mathcode`\(=32768
-  \mathcode`\[=32768 %\]
-  \mathcode`\:=32768
-  \mathcode`\,=32768
-  \mathcode`\;=32768
-  \let\rmathbr@orig@resetMathstrut=\resetMathstrut@
-  \begingroup
-    \gdef\resetMathstrut@
-    {
-      \mathcode`\(=16424% "4028
-      \rmathbr@orig@resetMathstrut
-      \mathcode`\(=32768% "8000
-    }
-    \gdef\newmcodes@
-    {
-      \mathcode`\'=39
-      \mathcode`\*=42
-      \mathcode`\.=24890% "613A
-      \mathcode`\-=45
-      \mathcode`\/=47
-      \mathcode`\:=24634% "603A
-      \relax
-    }
-  \endgroup%
-}
-\begingroup
-  \catcode`\:\active \gdef:{\futurelet\rmathbr@let@token\rmathbr@colontest}
-\endgroup
-%    \end{macrocode}
 %
-% \begin{macro}{\rmathbr@colontest}
-% Check for \verb|:=|.
 %    \begin{macrocode}
-\def\rmathbr@colontest%
-{
-  \ifx=\rmathbr@let@token
-    \expandafter\rmathbr@letsign
-  \else
-    \expandafter\rmathbr@colon
-  \fi
-}%
-\ifnum\mathcode`\:<32768
-  \edef\rmathbr@letsign#1{\noexpand\brokenrel{\mathchar\number\mathcode`\:\mathchar\number\mathcode`\=}}
-  \edef\rmathbr@colon{\noexpand\brokenrel{\mathchar\number\mathcode`\:}}
+\newif\ifrmathbr@activemathchar
+%    \end{macrocode}
+% Check for XeTeX/LuaTeX
+%    \begin{macrocode}
+\ifx\Umathcode\@undefined
+%    \end{macrocode}
+% Standard TeX
+% \begin{macro}{\rmathbr@checkmathchar}
+%    \begin{macrocode}
+  \def\rmathbr@checkmathchar#1{%
+    \ifnum\mathcode#1<32768\relax%
+      \rmathbr@activemathcharfalse%
+    \else%
+      \rmathbr@activemathchartrue%
+    \fi}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\rmathbr@mathchar}
+%    \begin{macrocode}
+  \def\rmathbr@mathchar#1{\mathchar\number\mathcode#1}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\rmathbr@makeactivemathopen}
+%    \begin{macrocode}
+  \def\rmathbr@makeactivemathopen#1{%
+    \begingroup
+      \xdef\@tempa{\mathopen\delimiter\number\delcode#1 \noexpand\nobr }
+      \begingroup\lccode`~=#1\catcode#1\active\lowercase{\endgroup\xdef~}{\@tempa}
+    \endgroup
+%    \end{macrocode}
+% \end{macro}
+%    \begin{macrocode}
+  }
 \else
-  \def\rmathbr@letsign#1{\brokenrel{\mathchar12346\mathchar12349}}
-  \def\rmathbr@colon{\brokenrel{\mathchar12346}}
+%    \end{macrocode}
+% XeTeX/LuaTeX
+% \begin{macro}{\rmathbr@activemathcode}
+%    \begin{macrocode}
+  \begingroup
+    \mathcode`\+="8000
+    \xdef\rmathbr@activemathcode{\number\Umathcodenum`\+}
+  \endgroup
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\rmathbr@checkmathchar}
+%    \begin{macrocode}
+  \def\rmathbr@checkmathchar#1{%
+    \ifnum\Umathcodenum#1=\rmathbr@activemathcode\relax%
+      \expandafter\rmathbr@activemathchartrue%
+    \else%
+      \expandafter\rmathbr@activemathcharfalse%
+    \fi}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\rmathbr@mathchar}
+%    \begin{macrocode}
+  \def\rmathbr@mathchar#1{\Umathcharnum\number\Umathcodenum#1}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\rmathbr@truncdiv}
+%    \begin{macrocode}
+  \def\rmathbr@truncdiv#1#2{((#1-(#2-1)/2)/#2)}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\rmathbr@modulo}
+%    \begin{macrocode}
+  \def\rmathbr@modulo#1#2{(#1-\rmathbr@truncdiv{#1}{#2}*#2)}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\rmathbr@makeactivemathopen}
+%    \begin{macrocode}
+  \def\rmathbr@makeactivemathopen#1{%
+    \begingroup
+      \def\@tempa{\Udelcodenum#1}
+      \ifnum\@tempa<"1000000
+        \xdef\@tempb{\mathopen\delimiter\number\@tempa\space\noexpand\nobr }
+      \else
+        \xdef\@tempb{\mathopen\Udelimiter4 %
+\number\numexpr\rmathbr@truncdiv{\rmathbr@modulo{\@tempa}{"40000000}}{"200000}\relax%
+\space\number\numexpr\rmathbr@modulo{\@tempa}{"200000}\relax\noexpand\nobr }
+      \fi
+      \begingroup\lccode`~=#1\catcode#1\active\expandafter\lowercase\expandafter%
+{\expandafter\endgroup\expandafter\gdef\expandafter~\expandafter}\expandafter{\@tempb}
+    \endgroup
+%    \end{macrocode}
+% \end{macro}
+%    \begin{macrocode}
+  }
 \fi
 %    \end{macrocode}
+% \begin{macro}{\rmathbr@makeactivemath}
+%    \begin{macrocode}
+\def\rmathbr@makeactivemath#1#2#3{
+  \begingroup
+    \rmathbr@checkmathchar{#1}
+    \lccode`~=#1
+    \catcode#1\active
+    \ifrmathbr@activemathchar
+      \PackageWarning{rmathbr}{Redeclare active math #1 symbol to default mathchar value}
+      \lowercase{\gdef~}{#2{#3}}
+    \else
+      \lowercase{\xdef~}{\noexpand#2{\rmathbr@mathchar{#1}}}
+    \fi
+  \endgroup
+}
+%    \end{macrocode}
 % \end{macro}
-%
-% Check for 'icomma' package and 'eulervm' package with 'icomma' option.
+% \begin{macro}{\rmathbr@makeactivemathpunct}
 %    \begin{macrocode}
-\begingroup
-  \catcode`\,\active
-  \@ifpackageloaded{icomma}% check for 'icomma' package
-  {
-    \expandafter\gdef\expandafter\sm@rtcomma\expandafter{\sm@rtcomma\nobr}
-  }{
-    \ifx\domathcomma\undefined% check for 'eulervm' package with 'icomma' option
-      \ifnum\mathcode`\,<32768
-        \xdef,{\mathpunct\mathchar\number\mathcode`\,\noexpand\nobr }
-      \else
-        \gdef,{\mathpunct\mathchar24891\nobr }
+\def\rmathbr@makeactivemathpunct#1#2{
+  \begingroup
+    \rmathbr@checkmathchar{#1}
+    \lccode`~=#1
+    \catcode#1\active
+    \ifrmathbr@activemathchar
+      \PackageWarning{rmathbr}{Redeclare active math #1 symbol to default mathchar value}
+      \lowercase{\gdef~}{\mathpunct#2\nobr }
+    \else
+      \lowercase{\xdef~}{\mathpunct\rmathbr@mathchar{#1} \noexpand\nobr }
+    \fi
+  \endgroup
+}
+%    \end{macrocode}
+% \end{macro}
+%    \begin{macrocode}
+\newif\ifrmathbr@protected
+%    \end{macrocode}
+% \begin{macro}{\rmathbr@ifprotected}
+%    \begin{macrocode}
+\def\rmathbr@ifprotected#1{%
+  \rmathbr@protectedfalse
+  \edef\str@cmd{\string#1\space}
+  \edef\meaning@cmd{\meaning#1}
+  \def\str@contains##1##2{\begingroup\edef\x{\endgroup\noexpand\in@{##1}{##2}}\x}
+  \str@contains\str@cmd\meaning@cmd
+  \ifin@
+    \str@contains{\string\protect\space}\meaning@cmd
+    \ifin@\rmathbr@protectedtrue\else
+      \str@contains{\string\x@protect\space}\meaning@cmd
+      \ifin@\rmathbr@protectedtrue\else
+        \str@contains{\string\@testopt\space}\meaning@cmd
+        \ifin@\rmathbr@protectedtrue\else
+          \str@contains{\string\@protected@testopt\space}\meaning@cmd
+          \ifin@\rmathbr@protectedtrue\fi
+        \fi
       \fi
-    \else
-      \expandafter\gdef\expandafter\domathcomma\expandafter{\domathcomma\nobr}
     \fi
-  }
-\endgroup
+  \fi
+}
 %    \end{macrocode}
-%
-% Check for 'program' package.
-%    \begin{macrocode}
-\begingroup
-  \catcode`\;\active
-  \@ifpackageloaded{program}%
-  {
-    \gdef;{\ifmmode\semicolon\;\nobr\else\@semicolon\fi}
-  }{
-    \ifnum\mathcode`\;<32768
-      \xdef;{\mathpunct\mathchar\number\mathcode`\;\noexpand\nobr }
-    \else
-      \gdef;{\mathpunct\mathchar24635\nobr }
-    \fi
-  }
-\endgroup
-%    \end{macrocode}
-%
+% \end{macro}
 % \begin{macro}{\rmathbr@ReDeclareRobustCommand}
+% Command without arguments
 %    \begin{macrocode}
-\def\rmathbr@ReDeclareRobustCommand#1#2% Command without arguments
-{
+\def\rmathbr@ReDeclareRobustCommand#1#2{%
   \begingroup
-    \ifx#1\undefined
+    \ifx#1\@undefined
     \else
       \edef\var@orig@I{rmathbr@orig@\expandafter\@gobble\string#1}
       \edef\var@Ispace{\expandafter\@gobble\string#1 }
       \expandafter\ifx\csname\var@orig@I\endcsname\relax
-        \expandafter\ifx\csname\var@Ispace\endcsname\relax
-          \global\expandafter\let\csname\var@orig@I\endcsname#1
+        \ifetex
+          \expandafter\global\expandafter\let\csname\var@orig@I\endcsname#1
         \else
-          \global\expandafter\let\csname\var@orig@I\expandafter\endcsname\csname\var@Ispace\endcsname
+          \rmathbr@ifprotected#1
+          \ifrmathbr@protected
+            \expandafter\global\expandafter\let\csname\var@orig@I\expandafter\endcsname%
+\csname\var@Ispace\endcsname
+          \else
+            \expandafter\global\expandafter\let\csname\var@orig@I\endcsname#1
+          \fi
         \fi
       \fi
-      \expandafter\gdef\csname\var@Ispace\endcsname{#2}% no arguments
-      \xdef#1{\noexpand\protect\expandafter\noexpand\csname\var@Ispace\endcsname}
+      \ifetex
+        \protected\gdef#1{#2}
+      \else
+        \expandafter\gdef\csname\var@Ispace\endcsname{#2}% no arguments
+        \xdef#1{\noexpand\protect\expandafter\noexpand\csname\var@Ispace\endcsname}
+      \fi
     \fi
   \endgroup%
 }
 %    \end{macrocode}
 % \end{macro}
-%
 % \begin{macro}{\rmathbr@ReDeclareRobustCommandI}
+% Command with one argument
 %    \begin{macrocode}
-\def\rmathbr@ReDeclareRobustCommandI#1#2% Command with one argument
-{
+\def\rmathbr@ReDeclareRobustCommandI#1#2{%
   \begingroup
-    \ifx#1\undefined
+    \ifx#1\@undefined
     \else
       \edef\var@orig@I{rmathbr@orig@\expandafter\@gobble\string#1}
-      \edef\var@Ispace{\expandafter\@gobble\string#1 }
+      \edef\var@Ispace{\expandafter\@gobble\string#1\space}
       \expandafter\ifx\csname\var@orig@I\endcsname\relax
-        \expandafter\ifx\csname\var@Ispace\endcsname\relax
-          \global\expandafter\let\csname\var@orig@I\endcsname#1
+        \ifetex
+          \expandafter\global\expandafter\let\csname\var@orig@I\endcsname#1
         \else
-          \global\expandafter\let\csname\var@orig@I\expandafter\endcsname\csname\var@Ispace\endcsname
+          \rmathbr@ifprotected#1
+          \ifrmathbr@protected
+            \expandafter\global\expandafter\let\csname\var@orig@I\expandafter\endcsname%
+\csname\var@Ispace\endcsname
+          \else
+            \expandafter\global\expandafter\let\csname\var@orig@I\endcsname#1
+          \fi
         \fi
       \fi
-      \expandafter\gdef\csname\var@Ispace\endcsname##1{#2}% one argument
-      \xdef#1{\noexpand\protect\expandafter\noexpand\csname\var@Ispace\endcsname}
+      \ifetex
+        \protected\gdef#1##1{#2}
+      \else
+        \expandafter\gdef\csname\var@Ispace\endcsname##1{#2}% one argument
+        \xdef#1{\noexpand\protect\expandafter\noexpand\csname\var@Ispace\endcsname}
+      \fi
     \fi
   \endgroup%
 }
 %    \end{macrocode}
 % \end{macro}
-%
-%
+% \begin{macro}{\brokenrel}
+%    \begin{macrocode}
+\rmathbr@ReDeclareRobustCommandI{\brokenrel}{\rmathbr@brokenrel{#1}}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\brokenbin}
+%    \begin{macrocode}
+\rmathbr@ReDeclareRobustCommandI{\brokenbin}{\rmathbr@brokenbin{#1}}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\brokeninner}
+%    \begin{macrocode}
+\rmathbr@ReDeclareRobustCommandI{\brokeninner}{\rmathbr@brokeninner{#1}}%
+%    \end{macrocode}
+% \end{macro}
+%    \begin{macrocode}
+\let\rmathbr@save@brokenrel=\brokenrel
+\let\rmathbr@save@brokenbin@on=\brokenbin
+\let\rmathbr@save@brokenbin=\brokenbin
+\let\rmathbr@save@brokeninner=\brokeninner
+%    \end{macrocode}
+% \begin{macro}{\rmathbr@brokenbinon}
+%    \begin{macrocode}
+\def\rmathbr@brokenbinon{%
+  \let\rmathbr@save@brokenbin=\rmathbr@save@brokenbin@on
+  \ifx\brokenbin\@firstofone\else
+    \let\brokenbin=\rmathbr@save@brokenbin
+  \fi
+}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\rmathbr@brokenbinoff}
+%    \begin{macrocode}
+\def\rmathbr@brokenbinoff{%
+  \let\rmathbr@save@brokenbin=\mathbin
+  \ifx\brokenbin\@firstofone\else
+    \let\brokenbin=\rmathbr@save@brokenbin
+  \fi
+}
+%    \end{macrocode}
+% \end{macro}
 % \begin{macro}{\rmathbr@setbrokens}
 %    \begin{macrocode}
-\def\rmathbr@setbrokens%
-{
-  \rmathbr@ReDeclareRobustCommandI{\brokenbin}{\rmathbr@brokenbin{##1}}
-  \rmathbr@ReDeclareRobustCommandI{\brokenrel}{\rmathbr@brokenrel{##1}}
-  \rmathbr@ReDeclareRobustCommandI{\brokeninner}{\rmathbr@brokeninner{##1}}%
+\def\rmathbr@setbrokens{%
+  \let\brokenrel=\rmathbr@save@brokenrel
+  \let\brokenbin=\rmathbr@save@brokenbin
+  \let\brokeninner=\rmathbr@save@brokeninner
+  \let\rmathbr@colontest=\rmathbr@save@colontest
 }
 %    \end{macrocode}
 % \end{macro}
-%
-%
 % \begin{macro}{\rmathbr@unsetbrokens}
 %    \begin{macrocode}
-\def\rmathbr@unsetbrokens%
-{
-  \def\brokenbin##1{##1}
-  \def\brokenrel##1{##1}
-  \def\brokeninner##1{##1}%
+\def\rmathbr@unsetbrokens{%
+  \let\brokenrel=\@firstofone
+  \let\brokenbin=\@firstofone
+  \let\brokeninner=\@firstofone
+  \let\rmathbr@colontest=\rmathbr@colon@std
 }
 %    \end{macrocode}
 % \end{macro}
-%
-%
-% \begin{macro}{\rmathbr@brokenbin}
-%    \begin{macrocode}
-\def\rmathbr@brokenbin#1%
-{
-  \relax
-  \def\rmathbr@arg{#1}
-  \def\rmathbr@this{\rmathbr@brokenbin}
-  \def\rmathbr@output{\rmathbr@@brokenbin}
-  \futurelet\rmathbr@let@token\rmathbr@brokenop%
-}
-%    \end{macrocode}
-% \end{macro}
-%
-%
 % \begin{macro}{\rmathbr@brokenrel}
 %    \begin{macrocode}
-\def\rmathbr@brokenrel#1%
-{
-  \relax
+\def\rmathbr@brokenrel#1{%
   \def\rmathbr@arg{#1}
-  \def\rmathbr@this{\rmathbr@brokenrel}
-  \def\rmathbr@output{\rmathbr@@brokenrel}
+  \let\rmathbr@this=\rmathbr@brokenrel
+  \let\rmathbr@output=\rmathbr@@brokenrel
   \futurelet\rmathbr@let@token\rmathbr@brokenop%
 }
 %    \end{macrocode}
 % \end{macro}
-%
-%
+% \begin{macro}{\rmathbr@brokenbin}
+%    \begin{macrocode}
+\def\rmathbr@brokenbin#1{%
+  \def\rmathbr@arg{#1}
+  \let\rmathbr@this=\rmathbr@brokenbin
+  \let\rmathbr@output=\rmathbr@@brokenbin
+  \futurelet\rmathbr@let@token\rmathbr@brokenop%
+}
+%    \end{macrocode}
+% \end{macro}
 % \begin{macro}{\rmathbr@brokeninner}
 %    \begin{macrocode}
-\def\rmathbr@brokeninner#1%
-{
-  \relax
+\def\rmathbr@brokeninner#1{%
   \def\rmathbr@arg{#1}
-  \def\rmathbr@this{\rmathbr@brokeninner}
-  \def\rmathbr@output{\rmathbr@@brokeninner}
+  \let\rmathbr@this=\rmathbr@brokeninner
+  \let\rmathbr@output=\rmathbr@@brokeninner
   \futurelet\rmathbr@let@token\rmathbr@brokenop%
 }
 %    \end{macrocode}
 % \end{macro}
-%
-%
 % \begin{macro}{\rmathbr@mathop}
 %    \begin{macrocode}
-\def\rmathbr@mathop#1%
-{
-  \relax
+\def\rmathbr@mathop#1{%
   \def\rmathbr@arg{#1}
-  \def\rmathbr@this{\rmathbr@mathop}
-  \def\rmathbr@output{\rmathbr@@mathop}
+  \let\rmathbr@this=\rmathbr@mathop
+  \let\rmathbr@output=\rmathbr@@mathop
   \futurelet\rmathbr@let@token\rmathbr@brokenop%
 }
 %    \end{macrocode}
 % \end{macro}
-%
-%
+% \begin{macro}{\rmathbr@@brokenrel}
+% LuaTeX only supports per-disc-node penalties
+%    \begin{macrocode}
+\def\rmathbr@@brokenrel#1{%
+  \ifnum\lastpenalty=\relpenalty
+    \mathrel{#1}
+  \else
+    \mathrel{#1}
+    \ifx$\rmathbr@let@token
+    \else
+      \begingroup
+        \hyphenpenalty\rmathbr@orig@relpenalty
+        \rmathbr@selector{#1}
+      \endgroup
+    \fi
+  \fi
+  \rmathbr@setbrokens
+  \penalty\relpenalty %
+}
+%    \end{macrocode}
+% \end{macro}
 % \begin{macro}{\rmathbr@@brokenbin}
 %    \begin{macrocode}
-\def\rmathbr@@brokenbin#1%
-{
+\def\rmathbr@@brokenbin#1{%
   \ifnum\lastpenalty=\relpenalty
     \mathbin{#1}
   \else
     \mathbin{#1}
     \ifx$\rmathbr@let@token
     \else
-      \rmathbr@selector{#1}
+      \begingroup
+        \hyphenpenalty\rmathbr@orig@binoppenalty
+        \rmathbr@selector{#1}
+      \endgroup
     \fi
   \fi
   \rmathbr@setbrokens
@@ -790,39 +1023,19 @@
 }
 %    \end{macrocode}
 % \end{macro}
-%
-%
-% \begin{macro}{\rmathbr@@brokenrel}
-%    \begin{macrocode}
-\def\rmathbr@@brokenrel#1%
-{
-  \ifnum\lastpenalty=\relpenalty
-    \mathrel{#1}
-  \else
-    \mathrel{#1}
-    \ifx$\rmathbr@let@token
-    \else
-      \rmathbr@selector{#1}
-    \fi
-  \fi
-  \rmathbr@setbrokens
-  \penalty\relpenalty %
-}
-%    \end{macrocode}
-% \end{macro}
-%
-%
 % \begin{macro}{\rmathbr@@brokeninner}
 %    \begin{macrocode}
-\def\rmathbr@@brokeninner#1%
-{
+\def\rmathbr@@brokeninner#1{%
   \ifnum\lastpenalty=\relpenalty
     \mathinner{#1}
   \else
     \mathinner{#1}
     \ifx$\rmathbr@let@token
     \else
-      \rmathbr@selector{#1}
+      \begingroup
+        \hyphenpenalty\rmathbr@orig@relpenalty
+        \rmathbr@selector{#1}
+      \endgroup
     \fi
   \fi
   \rmathbr@setbrokens
@@ -830,23 +1043,17 @@
 }
 %    \end{macrocode}
 % \end{macro}
-%
-%
 % \begin{macro}{\rmathbr@@mathop}
 %    \begin{macrocode}
-\def\rmathbr@@mathop#1%
-{
+\def\rmathbr@@mathop#1{%
   \rmathbr@setbrokens
   #1\nobr %
 }
 %    \end{macrocode}
 % \end{macro}
-%
-%
 % \begin{macro}{\rmathbr@selector}
 %    \begin{macrocode}
-\def\rmathbr@selector#1%
-{
+\def\rmathbr@selector#1{%
   \mathchoice
     {\discretionary{}{\hbox{$\m@th\displaystyle#1$}}{}}
     {\discretionary{}{\hbox{$\m@th\textstyle#1$}}{}}
@@ -855,33 +1062,30 @@
 }
 %    \end{macrocode}
 % \end{macro}
-%    \begin{macrocode}
-\begingroup\catcode`\_=12\catcode`\^=12
-%    \end{macrocode}
-%
 % \begin{macro}{\rmathbr@brokenop}
 %    \begin{macrocode}
-\gdef\rmathbr@brokenop%
-{
+\def\rmathbr@brokenop{%
   \ifmmode
     \rmathbr@unsetbrokens
-    \ifx\rmathbr@subscript@macro\rmathbr@let@token
+    \ifx\rmathbr@subscript@std\rmathbr@let@token
       \let\@command=\rmathbr@brokenglue
-    \else\ifx_\rmathbr@let@token
+    \else\ifx\rmathbr@subscript@other\rmathbr@let@token
       \let\@command=\rmathbr@brokenglue
-    \else\ifx\rmathbr@superscript@macro\rmathbr@let@token
+    \else\ifx\rmathbr@superscript@std\rmathbr@let@token
       \let\@command=\rmathbr@brokenglue
-    \else\ifx^\rmathbr@let@token
+    \else\ifx\rmathbr@superscript@other\rmathbr@let@token
       \let\@command=\rmathbr@brokenglue
     \else\ifx\limits\rmathbr@let@token
       \let\@command=\rmathbr@brokenskip
     \else\ifx\nolimits\rmathbr@let@token
       \let\@command=\rmathbr@brokenskip
+    \else\ifx\rmathbr@prime\rmathbr@let@token
+      \let\@command=\rmathbr@brokenskip
     \else\ifx\relax\rmathbr@let@token
       \let\@command=\rmathbr@brokenskip
     \else
       \let\@command=\rmathbr@output
-    \fi\fi\fi\fi\fi\fi\fi
+    \fi\fi\fi\fi\fi\fi\fi\fi
   \else
     \let\@command=\relax
   \fi
@@ -889,92 +1093,304 @@
 }
 %    \end{macrocode}
 % \end{macro}
-%    \begin{macrocode}
-\endgroup
-%    \end{macrocode}
-%
 % \begin{macro}{\rmathbr@brokenglue}
 %    \begin{macrocode}
-\def\rmathbr@brokenglue#1#2#3%
-{
+\def\rmathbr@brokenglue#1#2#3{%
   \def\rmathbr@temp{#1#2{#3}}
   \expandafter\rmathbr@this\expandafter{\rmathbr@temp}%
 }
 %    \end{macrocode}
 % \end{macro}
-%
 % \begin{macro}{\rmathbr@brokenskip}
 %    \begin{macrocode}
-\def\rmathbr@brokenskip#1#2%
-{
+\def\rmathbr@brokenskip#1#2{%
   \def\rmathbr@temp{#1#2}
   \expandafter\rmathbr@this\expandafter{\rmathbr@temp}%
 }
 %    \end{macrocode}
 % \end{macro}
 %
+%
+%
 % \begin{macro}{\rmathbr@setbreakable}
 %    \begin{macrocode}
-\def\rmathbr@setbreakable#1#2%
-{
+\def\rmathbr@setbreakable#1#2{%
   \begingroup
-    \ifx#1\undefined
+    \ifx#1\@undefined
     \else
       \edef\rmathbr@orig{rmathbr@orig@\expandafter\@gobble\string#1}
       \expandafter\ifx\csname\rmathbr@orig\endcsname\relax
-        \expandafter\rmathbr@ReDeclareRobustCommand\expandafter#1\expandafter{\expandafter#2\expandafter{\csname\rmathbr@orig\endcsname}}
+        \expandafter\rmathbr@ReDeclareRobustCommand\expandafter#1\expandafter{%
+\expandafter#2\expandafter{\csname\rmathbr@orig\endcsname}}
       \fi
     \fi
   \endgroup%
 }
 %    \end{macrocode}
 % \end{macro}
-%
 % \begin{macro}{\rmathbr@nobrafter}
 %    \begin{macrocode}
-\def\rmathbr@nobrafter#1%
-{
+\def\rmathbr@nobrafter#1{%
   \begingroup
-    \ifx#1\undefined
+    \ifx#1\@undefined
     \else
       \edef\rmathbr@orig{rmathbr@orig@\expandafter\@gobble\string#1}
       \expandafter\ifx\csname\rmathbr@orig\endcsname\relax
-        \expandafter\rmathbr@ReDeclareRobustCommand\expandafter#1\expandafter{\csname\rmathbr@orig\endcsname\nobr}
+        \expandafter\rmathbr@ReDeclareRobustCommand\expandafter#1\expandafter{%
+\csname\rmathbr@orig\endcsname\nobr}
       \fi
     \fi
   \endgroup%
 }
 %    \end{macrocode}
 % \end{macro}
-%
-% \begin{macro}{\rmathbr@nobrafter}
+% \begin{macro}{\rmathbr@unsetbroken}
 %    \begin{macrocode}
-\def\rmathbr@patch@commands{
+\def\rmathbr@unsetbroken#1{
+  \begingroup
+    \ifx#1\@undefined
+    \else
+      \edef\rmathbr@orig{rmathbr@orig@\expandafter\@gobble\string#1}
+      \expandafter\ifx\csname\rmathbr@orig\endcsname\relax
+	  \else
+	    \expandafter\global\expandafter\let\expandafter#1\csname\rmathbr@orig\endcsname
+      \fi
+    \fi
+  \endgroup%
+}
 %    \end{macrocode}
 % \end{macro}
 %
 % \subsection*{Redeclaration of math signs}
 %
+% \begin{macro}{\rmathbr@patch@commands}
+%    \begin{macrocode}
+\def\rmathbr@patch@commands{%
+%    \end{macrocode}
+% \end{macro}
+%
+% Basic math.
+% \begin{macro}{=}
+%    \begin{macrocode}
+\rmathbr@makeactivemath{`\=}{\brokenrel}{\mathchar12349}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{<}
+%    \begin{macrocode}
+\rmathbr@makeactivemath{`\<}{\brokenrel}{\mathchar12604}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{>}
+%    \begin{macrocode}
+\rmathbr@makeactivemath{`\>}{\brokenrel}{\mathchar12606}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{+}
+%    \begin{macrocode}
+\rmathbr@makeactivemath{`\+}{\brokenbin}{\mathchar8235}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{-}
+%    \begin{macrocode}
+\ifrmathbr@kv@brokenminus
+  \rmathbr@makeactivemath{`\-}{\brokenbin}{\mathchar8704}
+\fi
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{*}
+%    \begin{macrocode}
+\rmathbr@makeactivemath{`\*}{\brokenbin}{\mathchar8707}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{(}
+%    \begin{macrocode}
+\rmathbr@makeactivemathopen{`\(}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{[}
+%    \begin{macrocode}
+\rmathbr@makeactivemathopen{`\[}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{,}
+% Check for the \textsf{icomma} package and the \textsf{eulervm} package with \verb|icomma| option.
+%    \begin{macrocode}
+\@ifpackageloaded{icomma}{%
+  \expandafter\def\expandafter\sm@rtcomma\expandafter{\sm@rtcomma\nobr}
+}{
+  \ifx\domathcomma\@undefined%
+    \rmathbr@makeactivemathpunct{`\,}{\mathchar24891}
+  \else%
+    \expandafter\def\expandafter\domathcomma\expandafter{\domathcomma\nobr}
+  \fi
+}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{;}
+% Check for the \textsf{program} package.
+%    \begin{macrocode}
+\@ifpackageloaded{program}{%
+  \begingroup
+    \catcode`\;\active
+    \lccode`\~=`\;%
+    \lowercase{\gdef~}{\ifmmode\semicolon\;\nobr\else\@semicolon\fi}
+  \endgroup
+}{
+  \rmathbr@makeactivemathpunct{`\;}{\mathchar24635}
+}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{:}
+% Some extra code is necessary to distinguish between binary operation |:| and
+% relation |:=|.
+%    \begin{macrocode}
+\begingroup%
+  \catcode`\:\active%
+  \lccode`\~=`\:%
+  \lowercase{\gdef~}{\rmathbr@colontest}%
+\endgroup
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\rmathbr@colontest}
+% Check for \verb|:=|.
+%    \begin{macrocode}
+\def\rmathbr@colontest{\futurelet\rmathbr@let@token\rmathbr@do@colontest}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\rmathbr@do@colontest}
+%    \begin{macrocode}
+\def\rmathbr@do@colontest{%
+  \ifx=\rmathbr@let@token
+    \expandafter\rmathbr@letsign
+  \else
+    \expandafter\rmathbr@colon
+  \fi
+}%
+%    \end{macrocode}
+% \end{macro}
+%    \begin{macrocode}
+\rmathbr@checkmathchar{`\:}
+%    \end{macrocode}
+%    \begin{macrocode}
+\ifrmathbr@activemathchar
+%    \end{macrocode}
+%    \begin{macrocode}
+  \PackageWarning{rmathbr}{Redeclare active math `\: symbol to default mathchar value}
+%    \end{macrocode}
+%    \begin{macrocode}
+  \def\rmathbr@colon@std{\mathchar12346}
+%    \end{macrocode}
+%    \begin{macrocode}
+  \ifrmathbr@kv@brokencolon
+    \def\rmathbr@colon{\brokenbin{\rmathbr@colon@std}}
+  \else
+    \def\rmathbr@colon{\mathbin{\rmathbr@colon@std}}
+  \fi
+%    \end{macrocode}
+%    \begin{macrocode}
+  \def\rmathbr@letsign##1{\brokenrel{\rmathbr@colon@std\mathchar12349}}
+%    \end{macrocode}
+%    \begin{macrocode}
+\else
+%    \end{macrocode}
+%    \begin{macrocode}
+  \edef\rmathbr@colon@std{\rmathbr@mathchar{`\:}}
+%    \end{macrocode}
+%    \begin{macrocode}
+  \ifrmathbr@kv@brokencolon
+    \def\rmathbr@colon{\brokenbin{\rmathbr@colon@std}}
+  \else
+    \def\rmathbr@colon{\mathbin{\rmathbr@colon@std}}
+  \fi
+%    \end{macrocode}
+%    \begin{macrocode}
+  \edef\rmathbr@letsign##1{\noexpand\brokenrel{\rmathbr@colon@std\rmathbr@mathchar{`\=}}}
+%    \end{macrocode}
+%    \begin{macrocode}
+\fi
+%    \end{macrocode}
+%    \begin{macrocode}
+\let\rmathbr@save@colontest=\rmathbr@colontest%
+%    \end{macrocode}
+% Support of \textsf{unicode-math} package
+%    \begin{macrocode}
+\@ifpackageloaded{unicode-math}{
+  \begingroup
+    \def\UnicodeMathSymbol##1##2##3##4{%
+      \ifnum\number##1>127\relax
+        \expandafter\let\expandafter\@char\Uchar\number##1\relax
+        \ifx\@char##2\relax
+          \let\cmd\relax
+          \ifx##3\mathrel
+            \def\cmd{\brokenrel}
+          \else\ifx##3\mathbin
+            \def\cmd{\brokenbin}
+          \else\ifx##3\mathop
+            \def\cmd{\rmathbr@mathop}
+          \else\ifx##3\mathpunct
+            \let\cmd=\nobr
+          \fi\fi\fi\fi
+          \ifx\cmd\relax\else
+            \edef\var@orig@name{rmathbr@orig@\expandafter\@gobble\string##2}
+            \expandafter\def\expandafter\var@orig\expandafter{\csname\var@orig@name\endcsname}
+            \rmathbr@checkmathchar{\number##1}
+            \ifrmathbr@activemathchar
+              \begingroup
+                \lccode`~=\number##1
+                \catcode\number##1\active
+                \lowercase{\endgroup\expandafter\global\expandafter\let\var@orig~}
+            \else
+              \expandafter\xdef\var@orig{\rmathbr@mathchar{\number##1}}
+              \global\mathcode\number##1="8000
+            \fi
+            \ifx\cmd\nobr
+              \edef\@tempa{\expandafter\noexpand\var@orig\noexpand\nobr}
+            \else
+              \edef\@tempa{\expandafter\noexpand\cmd{\expandafter\noexpand\var@orig}}
+            \fi
+            \begingroup
+              \lccode`~=\number##1
+              \catcode\number##1\active
+              \lowercase{\endgroup\expandafter\gdef\expandafter~\expandafter}{\@tempa}
+          \fi
+        \fi
+      \fi
+    }
+    \let\par=\relax
+    \catcode`\"=12
+    \@@input{unicode-math-table.tex}
+  \endgroup
+}{}
+%    \end{macrocode}
+%
+% \begin{macro}{\not}
 % Redeclare \verb|\not|.
 %    \begin{macrocode}
-\rmathbr@ReDeclareRobustCommandI{\not}%
-{
+\rmathbr@ReDeclareRobustCommandI{\not}{%
   \begingroup
-    \edef\rmathbr@orig{rmathbr@orig@\expandafter\@gobble\string#1}
-    \expandafter\ifx\csname\rmathbr@orig\endcsname\relax
-      \brokenrel{\rmathbr@orig@not#1}
+    \edef\rmathbr@orig{rmathbr@orig@\expandafter\@gobble\string##1}
+    \expandafter\let\expandafter\rmathbr@origmacro\csname\rmathbr@orig\endcsname
+    \ifx\rmathbr@origmacro##1\relax
+      \begingroup
+        \let##1=\rmathbr@origmacro
+        \brokenrel{\rmathbr@orig@not##1}
+      \endgroup
     \else
-      \expandafter\brokenrel\expandafter{\expandafter\rmathbr@orig@not\csname\rmathbr@orig\endcsname}
+      \brokenrel{\rmathbr@orig@not##1}
     \fi
   \endgroup%
 }
 %    \end{macrocode}
+% \end{macro}
 % Open brackets.
 %    \begin{macrocode}
-\rmathbr@ReDeclareRobustCommandI{\bigl}{\rmathbr@mathop{\mathopen\big#1}}
-\rmathbr@ReDeclareRobustCommandI{\Bigl}{\rmathbr@mathop{\mathopen\Big#1}}
-\rmathbr@ReDeclareRobustCommandI{\biggl}{\rmathbr@mathop{\mathopen\bigg#1}}
-\rmathbr@ReDeclareRobustCommandI{\Biggl}{\rmathbr@mathop{\mathopen\Bigg#1}}
+\rmathbr@ReDeclareRobustCommandI{\bigl}{\rmathbr@mathop{\mathopen\big##1}}
+\rmathbr@ReDeclareRobustCommandI{\Bigl}{\rmathbr@mathop{\mathopen\Big##1}}
+\rmathbr@ReDeclareRobustCommandI{\biggl}{\rmathbr@mathop{\mathopen\bigg##1}}
+\rmathbr@ReDeclareRobustCommandI{\Biggl}{\rmathbr@mathop{\mathopen\Bigg##1}}
 \SetOpenBracket{\lmoustache}
 \SetOpenBracket{\langle}
 \SetOpenBracket{\lbrace}
@@ -1012,7 +1428,6 @@
 \SetPunctuation{\colon}
 \SetPunctuation{\period}
 %    \end{macrocode}
-%
 % Binary Operations.
 %    \begin{macrocode}
 \SetBreakableBin{\triangleleft}
@@ -1048,69 +1463,70 @@
 \SetBreakableBin{\times}
 \SetBreakableBin{\cdot}
 %    \end{macrocode}
-%
-% \begin{macro}{\cdott}
+% \begin{macro}{\rmathbr@cdott}
 % \verb|\cdott| is \verb|\cdot| that is changed to \verb|\times| at break point.
 %    \begin{macrocode}
 \def\rmathbr@cdott{%
-  %% inplace-expanded mathchoice from mathstyle.sty
-  \mathchoice{%
-    \mkern\medmuskip$%
-    \discretionary{\the\textfont2\char2}{\the\textfont2\char2}{\the\textfont2\char1}%
-    $\displaystyle\mkern\medmuskip%
-  }{%
-    \mkern\medmuskip$%
-    \discretionary{\the\textfont2\char2}{\the\textfont2\char2}{\the\textfont2\char1}%
-    $\textstyle\mkern\medmuskip%
-  }{%
-    $%
-    \discretionary{\the\scriptfont2\char2}{\the\scriptfont2\char2}{\the\scriptfont2\char1}%
-    $\scriptstyle%
-  }{%
-    $%
-    \discretionary{\the\scriptscriptfont2\char2}{\the\scriptscriptfont2\char2}{\the\scriptscriptfont2\char1}%
-    $\scriptscriptstyle%
-  }
+  $\begingroup\hyphenpenalty\rmathbr@orig@binoppenalty\discretionary%
+    {\hbox{$\m@th\rmathbr@orig@times$}}%
+    {\hbox{$\m@th\rmathbr@orig@times$}}%
+    {\hbox{$\m@th\mkern\medmuskip\rmathbr@orig@cdot\mkern\medmuskip$}}\endgroup$
 }
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\cdott}
+%    \begin{macrocode}
 \def\cdott{%
-  \ensuremath
-  \ifetex
-    \ifinner%
-      \ifnum\currentgrouptype=15\relax
-        \rmathbr@cdott
+  \ifmmode
+    \ifetex
+      \ifinner%
+        \ifnum\currentgrouptype=15\relax
+          \rmathbr@cdott
+        \else
+          \rmathbr@orig@cdot
+        \fi
       \else
-        \cdot
+        \rmathbr@orig@cdot
       \fi
     \else
-      \cdot
+      \rmathbr@cdott
     \fi
   \else
-    \rmathbr@cdott
+    \rmathbr@orig@cdot
   \fi
 }
-\ifrmathbr@cdottimes
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\cdot}
+%    \begin{macrocode}
+\ifrmathbr@kv@cdottimes
   \let\cdot\cdott
 \fi
 %    \end{macrocode}
 % \end{macro}
-%
 % \begin{macro}{\*}
 %    \begin{macrocode}
 \def\*{\mathbin{}%
-  \mathchoice{%
-      \discretionary{\hbox{$\m@th\displaystyle\times$}}{\hbox{$\m@th\displaystyle\times$}}{}%
-    }{%
-      \discretionary{\hbox{$\m@th\textstyle\times$}}{\hbox{$\m@th\textstyle\times$}}{}%
-    }{%
-      \discretionary{\hbox{$\m@th\scriptstyle\times$}}{\hbox{$\m@th\scriptstyle\times$}}{}%
-    }{%
-      \discretionary{\hbox{$\m@th\scriptscriptstyle\times$}}{\hbox{$\m@th\scriptscriptstyle\times$}}{}%
-    }%
+  \begingroup%
+    \hyphenpenalty\rmathbr@orig@binoppenalty%
+    \mathchoice{%
+        \discretionary{\hbox{$\m@th\displaystyle\mkern\thinmuskip\times$}}%
+{\hbox{$\m@th\displaystyle\times\mkern\thinmuskip$}}{}%
+      }{%
+        \discretionary{\hbox{$\m@th\textstyle\mkern\thinmuskip\times$}}%
+{\hbox{$\m@th\textstyle\times\mkern\thinmuskip$}}{}%
+      }{%
+        \discretionary{\hbox{$\m@th\scriptstyle\mkern\thinmuskip\times$}}%
+{\hbox{$\m@th\scriptstyle\times\mkern\thinmuskip$}}{}%
+      }{%
+        \discretionary{\hbox{$\m@th\scriptscriptstyle\mkern\thinmuskip\times$}}%
+{\hbox{$\m@th\scriptscriptstyle\times\mkern\thinmuskip$}}{}%
+      }%
+  \endgroup%
   \penalty\binoppenalty%
 }
 %    \end{macrocode}
 % \end{macro}
-%
 % Relations.
 %    \begin{macrocode}
 \SetBreakableRel{\propto}
@@ -1178,7 +1594,7 @@
 \SetBreakableRel{\hookrightarrow}
 \SetBreakableRel{\rightleftharpoons}
 %    \end{macrocode}
-% From latexsym.
+% Commands from \textsf{latexsym}.
 %    \begin{macrocode}
 \SetBreakableBin{\lhd}
 \SetBreakableBin{\unlhd}
@@ -1189,10 +1605,9 @@
 \SetBreakableRel{\sqsubset}
 \SetBreakableRel{\sqsupset}
 %    \end{macrocode}
-% amsfonts
+% Support \textsf{amsfonts} package
 %    \begin{macrocode}
-\@ifpackageloaded{amsfonts}% amsfonts
-{
+\@ifpackageloaded{amsfonts}{
   \SetBreakableRel{\dashrightarrow} \SetBreakableRel{\dasharrow}
   \SetBreakableRel{\dashleftarrow}
   \SetBreakableRel{\vartriangleright}
@@ -1202,10 +1617,9 @@
   \SetBreakableRel{\rightsquigarrow} \SetBreakableRel{\leadsto}
 }{}
 %    \end{macrocode}
-% amssymb
+% Support \textsf{amssymb} package
 %    \begin{macrocode}
-\@ifpackageloaded{amssymb}% amssymb
-{
+\@ifpackageloaded{amssymb}{
   \SetBreakableBin{\boxdot}
   \SetBreakableBin{\boxplus}
   \SetBreakableBin{\boxtimes}
@@ -1385,10 +1799,9 @@
   \SetBreakableRel{\backepsilon}
 }{}
 %    \end{macrocode}
-% amstex
+% Support \textsf{amstex} package
 %    \begin{macrocode}
-\@ifpackageloaded{amstex}% amstex
-{
+\@ifpackageloaded{amstex}{
   \SetBreakableRel{\vartriangleright} \SetBreakableRel{\rhd}
   \SetBreakableRel{\vartriangleleft}  \SetBreakableRel{\lhd}
   \SetBreakableRel{\trianglerighteq}  \SetBreakableRel{\unrhd}
@@ -1396,10 +1809,9 @@
   \SetBreakableRel{\rightsquigarrow}  \SetBreakableRel{\leadsto}
 }{}
 %    \end{macrocode}
-% boisik
+% Support \textsf{boisik} package
 %    \begin{macrocode}
-\@ifpackageloaded{boisik}% boisik
-{
+\@ifpackageloaded{boisik}{
   \SetMathOperator{\intup}
   \SetOpenBracket{\binampersand}
   \SetBreakableRel{\upharpoonright}
@@ -1800,10 +2212,9 @@
   \SetBreakableRel{\leftrightarrowtriangle}
 }{}
 %    \end{macrocode}
-% euler
+% Support \textsf{euler} package
 %    \begin{macrocode}
-\@ifpackageloaded{euler}% euler
-{
+\@ifpackageloaded{euler}{% euler
   \SetBreakableRel{\uparrow}
   \SetBreakableRel{\downarrow}
   \SetBreakableRel{\updownarrow}
@@ -1814,10 +2225,9 @@
   % \SetBreakableRel{\rhook}
 }{}
 %    \end{macrocode}
-% fourier
+% Support \textsf{fourier} package
 %    \begin{macrocode}
-\@ifpackageloaded{fourier}% fourier
-{
+\@ifpackageloaded{fourier}{
   \SetMathOperator{\iint}
   \SetMathOperator{\iiint}
   \SetMathOperator{\oiint}
@@ -1848,10 +2258,9 @@
 }{}
 %    \end{macrocode}
 %
-% Lucida font (lucbmath,lucidabr,lucmin,lucmtime,luctime)
-%
+% Support Lucida font packages (\textsf{lucbmath}, \textsf{lucidabr}, \textsf{lucmin},
+% \textsf{lucmtime}, \textsf{luctime})
 %    \begin{macrocode}
-
 \ifnum\@ifpackageloaded{lucbmath}{1}{%
 \@ifpackageloaded{lucidabr}{1}{%
 \@ifpackageloaded{lucmin}{1}{%
@@ -2060,36 +2469,52 @@
   \SetBreakableRel{\backepsilon}
 \fi
 %    \end{macrocode}
-% mathbbol
+% Support \textsf{mathbbol} package
 %    \begin{macrocode}
-\@ifpackageloaded{mathbbol}% mathbbol
-{
+\@ifpackageloaded{mathbbol}{
   \SetOpenBracket{\Langle}
   \SetOpenBracket{\Lparen}
 }{}
 %    \end{macrocode}
-% mdwmath
+% Support \textsf{mathtools}/\textsf{empheq} packages
 %    \begin{macrocode}
-\@ifpackageloaded{mdwmath}% mdwmath
-{
+\@ifpackageloaded{mathtools}{
+  \SetBreakableRel{\vcentcolon}
+  \SetBreakableRel{\dblcolon}
+  \SetBreakableRel{\coloneqq}
+  \SetBreakableRel{\Coloneqq}
+  \SetBreakableRel{\coloneq}
+  \SetBreakableRel{\Coloneq}
+  \SetBreakableRel{\eqqcolon}
+  \SetBreakableRel{\Eqqcolon}
+  \SetBreakableRel{\eqcolon}
+  \SetBreakableRel{\Eqcolon}
+  \SetBreakableRel{\colonapprox}
+  \SetBreakableRel{\Colonapprox}
+  \SetBreakableRel{\colonsim}
+  \SetBreakableRel{\Colonsim}
+}{}
+%    \end{macrocode}
+% Support \textsf{mdwmath} package
+%    \begin{macrocode}
+\@ifpackageloaded{mdwmath}{
   \SetBreakableBin{\bitand}
   \begingroup
-    \catcode`\&\active \xdef&{\noexpand\brokenbin{\mathchar\number\mathcode`\&}}
+    \catcode`\&\active
+    \xdef&{\noexpand\brokenbin{\rmathbr@mathchar{`\&}}}
   \endgroup
   \AtBeginDocument{\mathcode`\&=32768 }
 }{}
 %    \end{macrocode}
-% sbmm
+% Support \textsf{sbmm} package
 %    \begin{macrocode}
-\@ifpackageloaded{sbbm}% sbbm
-{
+\@ifpackageloaded{sbbm}{
   \SetOpenBracket{\Lparen}
 }{}
 %    \end{macrocode}
-% stmaryrd
+% Support \textsf{stmaryrd} package
 %    \begin{macrocode}
-\@ifpackageloaded{stmaryrd}% stmaryrd
-{
+\@ifpackageloaded{stmaryrd}{
   \SetOpenBracket{\Lbag}
   \SetOpenBracket{\llparenthesis}
   \SetOpenBracket{\binampersand}
@@ -2189,10 +2614,9 @@
   \SetBreakableRel{\Longmapsfrom}
 }{}
 %    \end{macrocode}
-% wasysym
+% Support \textsf{wasysym} package
 %    \begin{macrocode}
-\@ifpackageloaded{wasysym}% wasysym
-{
+\@ifpackageloaded{wasysym}{
   \SetMathOperator{\varint}
   \SetMathOperator{\iint}
   \SetMathOperator{\iiint}
@@ -2208,28 +2632,9 @@
   \SetBreakableRel{\logof}
 }{}
 %    \end{macrocode}
-% mathtools/empheq
 %    \begin{macrocode}
-\@ifpackageloaded{mathtools}% mathtools/empheq
-{
-  \SetBreakableRel{\vcentcolon}
-  \SetBreakableRel{\dblcolon}
-  \SetBreakableRel{\coloneqq}
-  \SetBreakableRel{\Coloneqq}
-  \SetBreakableRel{\coloneq}
-  \SetBreakableRel{\Coloneq}
-  \SetBreakableRel{\eqqcolon}
-  \SetBreakableRel{\Eqqcolon}
-  \SetBreakableRel{\eqcolon}
-  \SetBreakableRel{\Eqcolon}
-  \SetBreakableRel{\colonapprox}
-  \SetBreakableRel{\Colonapprox}
-  \SetBreakableRel{\colonsim}
-  \SetBreakableRel{\Colonsim}
-}{}
-%    \end{macrocode}
 } % \rmathbr@patch@commands
-% \end{macro}
+%    \end{macrocode}
 %
 % Execute \verb|\rmathbr@patch@commands| depending on options:
 %    \begin{macrocode}
@@ -2239,10 +2644,46 @@
   \rmathbr@patch@commands
 \fi
 %    \end{macrocode}
-% bm package
+%
+% Switch to active math mode at \verb|\begin{document}|
 %    \begin{macrocode}
-\@ifpackageloaded{bm}%
-{
+\AtBeginDocument{%
+  \mathcode`\==32768% "8000
+  \mathcode`\<=32768
+  \mathcode`\>=32768
+  \mathcode`\+=32768
+  \ifrmathbr@kv@brokenminus
+    \mathcode`\-=32768
+  \fi
+  \mathcode`\*=32768
+  \mathcode`\(=32768
+  \mathcode`\[=32768 %\]
+  \mathcode`\,=32768
+  \mathcode`\;=32768
+  \mathcode`\:=32768
+  \@ifundefined{resetMathstrut@}{}{% fix amsmath
+    \let\rmathbr@orig@resetMathstrut=\resetMathstrut@
+    \gdef\resetMathstrut@{%
+      \mathcode`\(=16424% "4028
+      \rmathbr@orig@resetMathstrut
+      \mathcode`\(=32768% "8000
+    }
+    \gdef\newmcodes@{%
+      \mathcode`\'=39
+      \mathcode`\*=42
+      \mathcode`\.=24890% "613A
+      \mathcode`\-=45
+      \mathcode`\/=47
+      \mathcode`\:=24634% "603A
+      \relax
+    }
+  }%
+}
+%    \end{macrocode}
+%
+% Patch for \textsf{bm} package:
+%    \begin{macrocode}
+\@ifpackageloaded{bm}{%
   \let\rmathbr@save@bm@general=\bm@general
   \def\bm@general#1#2#3#4#5{
     \rmathbr@save@bm@general{#1}{#2}{%
@@ -2251,21 +2692,24 @@
       \def\brokenbin##1{\unvcopy{\brokenbin{##1}}}
       \def\brokeninner##1{\unvcopy{\brokeninner{##1}}}
       \def\rmathbr@mathop##1{\unvcopy{\rmathbr@mathop{##1}}}
+      \begingroup\catcode`\_\active\lccode`\~`\_\lowercase{\endgroup\def~}##1{\unvcopy{_{##1}}}
+      \begingroup\catcode`\^\active\lccode`\~`\^\lowercase{\endgroup\def~}##1{\unvcopy{^{##1}}}
       #3}{#4}{#5}
   }
   \PackageInfo{rmathbr}{Note: 'bm' package has been patched}{}%
 }{}
 %    \end{macrocode}
-% Patch for xy package:
+%
+% Patch for \textsf{xy} package:
 %    \begin{macrocode}
-\@ifpackageloaded{xy}%
-{
+\@ifpackageloaded{xy}{%
   \ifnum\rmathbr@scriptsmode>0\relax
     \let\rmathbr@save@xy=\xy
     \let\rmathbr@save@endxy=\endxy
     \def\xy{\begingroup\catcode`\^7\catcode`\_8\rmathbr@save@xy}
     \def\endxy{\rmathbr@save@endxy\endgroup}
-    \PackageInfo{rmathbr}{Note: \string\xy and \string\endxy commands from 'xy' package have been patched}{}%
+    \PackageInfo{rmathbr}{Note: \string\xy and \string\endxy commands from 'xy'
+                                package have been patched}{}%
   \fi
 }{}
 %    \end{macrocode}
