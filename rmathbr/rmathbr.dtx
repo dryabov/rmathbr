@@ -668,12 +668,50 @@
 %
 % \begin{macro}{\rmathbr@superscript}
 %    \begin{macrocode}
-\def\rmathbr@superscript#1{\rmathbr@superscript@std{{#1}}}
+\def\rmathbr@superscript#1{\rmathbr@check@arg\rmathbr@superscript@std{#1}}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\rmathbr@subscript}
 %    \begin{macrocode}
-\def\rmathbr@subscript#1{\rmathbr@subscript@std{{#1}}}
+\def\rmathbr@subscript#1{\rmathbr@check@arg\rmathbr@subscript@std{#1}}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\rmathbr@check@arg}
+% Check that argument is rmathbr-processed command and wrap it into braces
+% (if necessary)
+%    \begin{macrocode}
+\def\rmathbr@check@arg#1#2{%
+  \rmathbr@split#2\@nil
+  \ifx\rmathbr@tail\empty
+    \edef\rmathbr@str{\expandafter\@gobble\string#2}
+    \ifx\rmathbr@str\empty
+      \let\rmathbr@command=\rmathbr@wrap@arg
+    \else
+      \expandafter\ifx\csname rmathbr@orig@\rmathbr@str\endcsname\relax
+        \let\rmathbr@command=\@firstofone
+      \else
+        \let\rmathbr@command=\rmathbr@wrap@arg
+      \fi
+    \fi
+  \else
+    \let\rmathbr@command=\rmathbr@wrap@arg
+  \fi
+  #1\rmathbr@command{#2}%
+}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\rmathbr@split}
+%    \begin{macrocode}
+\def\rmathbr@split#1#2\@nil{%
+  \def\rmathbr@head{#1}
+  \def\rmathbr@tail{#2}
+}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\rmathbr@wrap@arg}
+%    \begin{macrocode}
+\def\rmathbr@wrap@arg#1{{#1}}
 %    \end{macrocode}
 % \end{macro}
 %
@@ -1174,8 +1212,9 @@
     \else
       \edef\rmathbr@orig{rmathbr@orig@\expandafter\@gobble\string#1}
       \expandafter\ifx\csname\rmathbr@orig\endcsname\relax
-	  \else
-	    \expandafter\global\expandafter\let\expandafter#1\csname\rmathbr@orig\endcsname
+      \else
+        \expandafter\global\expandafter\let\expandafter#1\csname\rmathbr@orig\endcsname
+        \expandafter\global\expandafter\let\csname\rmathbr@orig\endcsname=\undefined
       \fi
     \fi
   \endgroup%
