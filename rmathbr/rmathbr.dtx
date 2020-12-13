@@ -590,6 +590,28 @@
   \AtBeginDocument{\catcode`\^\active\catcode`\_\active}
 \fi
 %    \end{macrocode}
+% \begin{macro}{\rmathbr@pr@m@s}
+%  Fix prime symbol to take into account active math superscripts.
+%    \begin{macrocode}
+\def\rmathbr@pr@m@s{%
+  \ifx'\@let@token
+    \let\rmathbr@command=\pr@@@s
+  \else\ifx\rmathbr@superscript@std\@let@token
+    \let\rmathbr@command=\pr@@@t
+  \else\ifx\rmathbr@superscript@other\@let@token
+    \let\rmathbr@command=\pr@@@t
+  \else
+    \let\rmathbr@command=\egroup
+  \fi\fi\fi
+  \rmathbr@command}
+%    \end{macrocode}
+% \end{macro}
+%
+%    \begin{macrocode}
+\ifnum\rmathbr@scriptsmode>0\relax
+  \let\pr@m@s=\rmathbr@pr@m@s
+\fi
+%    \end{macrocode}
 %
 % Store original penalty values (via mathchardef trick).
 %    \begin{macrocode}
