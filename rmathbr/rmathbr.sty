@@ -20,11 +20,12 @@
 %% 
 \NeedsTeXFormat{LaTeX2e}[1999/12/01]
 \ProvidesPackage{rmathbr}
-    [2020/12/11 1.1 Repeating of math operator at the broken line and the new
-                    line in inline equations]
+    [2020/12/18 1.1.1 Repeating of math operator at the broken line and the new
+                      line in inline equations]
 \RequirePackage{ifetex}
 \RequirePackage{ifluatex}
 \RequirePackage{xkeyval}
+\RequirePackage{expl3}
 \edef\rmathbr@kv{\@currname.\@currext}
 \def\xDeclareBoolOptionX#1#2{%
   \define@boolkey{\rmathbr@kv}[rmathbr@kv@]{#1}[true]{#2}%
@@ -69,19 +70,12 @@
     \ExecuteOptionsX{scripts=active}
   \fi
 }
-\let\rmathbr@scriptsmode=\@ne
-\xDeclareChoiceOptionX{scripts}[\val\nr]{noactive,mathactive,active}[mathactive]{
-  \ifcase\nr\relax
-    \let\rmathbr@scriptsmode=\z@
-  \or
-    \let\rmathbr@scriptsmode=\@ne
-  \or
-    \let\rmathbr@scriptsmode=\tw@
-  \fi
+\xDeclareChoiceOptionX{scripts}[\xkv@val\xkv@nr]{noactive,mathactive,active}[mathactive]{
+  \let\rmathbr@kv@scriptsmode=\xkv@nr
 }
 \newif\ifrmathbr@patch@begindocument
-\xDeclareChoiceOptionX{run}[\val\nr]{atload,atbegindocument,auto}[auto]{
-  \ifcase\nr\relax
+\xDeclareChoiceOptionX{run}[\xkv@val\xkv@nr]{atload,atbegindocument,auto}[auto]{
+  \ifcase\xkv@nr\relax
     \rmathbr@patch@begindocumentfalse
   \or
     \rmathbr@patch@begindocumenttrue
@@ -106,13 +100,38 @@
 \ExecuteOptionsX{brokencolon=false}
 \ExecuteOptionsX{brokenbin=true}
 \ProcessOptionsX
-\ifcase\rmathbr@scriptsmode
+\ifcase\rmathbr@kv@scriptsmode
   % nop
 \or
   \AtBeginDocument{\catcode`\^=12\mathcode`\^=32768\catcode`\_=12\mathcode`\_=32768}
 \or
   \AtBeginDocument{\catcode`\^\active\catcode`\_\active}
 \fi
+\def\rmathbr@pr@m@s{%
+  \ifx'\@let@token
+    \let\rmathbr@command=\pr@@@s
+  \else\ifx\rmathbr@superscript@std\@let@token
+    \let\rmathbr@command=\pr@@@t
+  \else\ifx\rmathbr@superscript@other\@let@token
+    \let\rmathbr@command=\pr@@@t
+  \else
+    \let\rmathbr@command=\egroup
+  \fi\fi\fi
+  \rmathbr@command}
+\ifnum\rmathbr@kv@scriptsmode>0\relax
+  \let\pr@m@s=\rmathbr@pr@m@s
+\fi
+\ExplSyntaxOn
+\def\rmathbr@unicodemath@primes@patch{
+  \cs_gset:Nn \__um_superscript:n
+    {
+      \rmathbr@superscript@std\bgroup ##1
+      \peek_meaning_remove:NTF \rmathbr@superscript@other \__um_arg_i_before_egroup:n {
+        \peek_meaning_remove:NTF \rmathbr@superscript@std \__um_arg_i_before_egroup:n \egroup
+      }
+    }
+}
+\ExplSyntaxOff
 \mathchardef\rmathbr@orig@relpenalty=\relpenalty
 \mathchardef\rmathbr@orig@binoppenalty=\binoppenalty
 \ifluatex\else
@@ -126,8 +145,25 @@
 \begingroup\catcode`\_=8 \global\let\rmathbr@subscript@std=_\endgroup
 \begingroup\catcode`\_=12\global\let\rmathbr@subscript@other=_\endgroup
 \begingroup\catcode`\'=12\global\let\rmathbr@prime='\endgroup
-\def\rmathbr@superscript#1{\rmathbr@superscript@std{{#1}}}
-\def\rmathbr@subscript#1{\rmathbr@subscript@std{{#1}}}
+\def\rmathbr@superscript{\rmathbr@check@arg\rmathbr@superscript@std}
+\def\rmathbr@subscript{\rmathbr@check@arg\rmathbr@subscript@std}
+\def\rmathbr@check@arg#1{%
+  \let\rmathbr@checkarg@cmd=#1
+  \futurelet\rmathbr@let@token\rmathbr@check@@arg%
+}
+\def\rmathbr@check@@arg#1{%
+  \let\rmathbr@command=\rmathbr@wrap@arg
+  \ifx\rmathbr@let@token\bgroup\else
+    \edef\rmathbr@orig{\expandafter\@gobble\string#1}
+    \ifx\rmathbr@orig\empty\else
+      \expandafter\ifx\csname rmathbr@orig@\rmathbr@orig\endcsname\relax
+        \let\rmathbr@command=\@firstofone
+      \fi
+    \fi
+  \fi
+  \rmathbr@checkarg@cmd\rmathbr@command{#1}%
+}
+\def\rmathbr@wrap@arg#1{{#1}}
 \begingroup
   \catcode`\^\active\gdef^{\rmathbr@superscript}
   \catcode`\_\active\gdef_{\rmathbr@subscript}
@@ -203,20 +239,19 @@
   \endgroup
 }
 \newif\ifrmathbr@protected
+\def\rmathbr@str@contains#1#2{\begingroup\edef\x{\endgroup\noexpand\in@{#1}{#2}}\x}
 \def\rmathbr@ifprotected#1{%
   \rmathbr@protectedfalse
-  \edef\str@cmd{\string#1\space}
   \edef\meaning@cmd{\meaning#1}
-  \def\str@contains##1##2{\begingroup\edef\x{\endgroup\noexpand\in@{##1}{##2}}\x}
-  \str@contains\str@cmd\meaning@cmd
+  \rmathbr@str@contains{\string#1\space}\meaning@cmd
   \ifin@
-    \str@contains{\string\protect\space}\meaning@cmd
+    \rmathbr@str@contains{\string\protect\space}\meaning@cmd
     \ifin@\rmathbr@protectedtrue\else
-      \str@contains{\string\x@protect\space}\meaning@cmd
+      \rmathbr@str@contains{\string\x@protect\space}\meaning@cmd
       \ifin@\rmathbr@protectedtrue\else
-        \str@contains{\string\@testopt\space}\meaning@cmd
+        \rmathbr@str@contains{\string\@testopt\space}\meaning@cmd
         \ifin@\rmathbr@protectedtrue\else
-          \str@contains{\string\@protected@testopt\space}\meaning@cmd
+          \rmathbr@str@contains{\string\@protected@testopt\space}\meaning@cmd
           \ifin@\rmathbr@protectedtrue\fi
         \fi
       \fi
@@ -458,8 +493,9 @@
     \else
       \edef\rmathbr@orig{rmathbr@orig@\expandafter\@gobble\string#1}
       \expandafter\ifx\csname\rmathbr@orig\endcsname\relax
-  \else
-    \expandafter\global\expandafter\let\expandafter#1\csname\rmathbr@orig\endcsname
+      \else
+        \expandafter\global\expandafter\let\expandafter#1\csname\rmathbr@orig\endcsname
+        \expandafter\global\expandafter\let\csname\rmathbr@orig\endcsname=\undefined
       \fi
     \fi
   \endgroup%
@@ -572,6 +608,9 @@
     \catcode`\"=12
     \@@input{unicode-math-table.tex}
   \endgroup
+  \ifnum\rmathbr@kv@scriptsmode>0\relax
+    \rmathbr@unicodemath@primes@patch
+  \fi
 }{}
 \rmathbr@ReDeclareRobustCommandI{\not}{%
   \begingroup
@@ -1809,7 +1848,7 @@
   \PackageInfo{rmathbr}{Note: 'bm' package has been patched}{}%
 }{}
 \@ifpackageloaded{xy}{%
-  \ifnum\rmathbr@scriptsmode>0\relax
+  \ifnum\rmathbr@kv@scriptsmode>0\relax
     \let\rmathbr@save@xy=\xy
     \let\rmathbr@save@endxy=\endxy
     \def\xy{\begingroup\catcode`\^7\catcode`\_8\rmathbr@save@xy}

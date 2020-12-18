@@ -28,8 +28,8 @@
 %<package>\NeedsTeXFormat{LaTeX2e}[1999/12/01]
 %<package>\ProvidesPackage{rmathbr}
 %<*package>
-    [2020/12/11 1.1 Repeating of math operator at the broken line and the new
-                    line in inline equations]
+    [2020/12/18 1.1.1 Repeating of math operator at the broken line and the new
+                      line in inline equations]
 %</package>
 %
 %<*driver>
@@ -41,8 +41,10 @@
             pdfauthor={Denis Ryabov},
             pdftitle={rmathbr : Repeating of math operator at the broken line and
                                 the new line in inline equations}]{hyperref}
+\usepackage{microtype}
 \usepackage{enumitem}
 \usepackage{multicol}
+\setlength{\columnseprule}{0.2pt}
 \usepackage{array,longtable}
 \usepackage{rmathbr}
 \setlist{nosep}
@@ -58,7 +60,7 @@
 %</driver>
 % \fi
 %
-% \CheckSum{3823}
+% \CheckSum{3913}
 %
 % \CharacterTable
 %  {Upper-case    \A\B\C\D\E\F\G\H\I\J\K\L\M\N\O\P\Q\R\S\T\U\V\W\X\Y\Z
@@ -113,12 +115,12 @@
 %
 % It's recommended to load \textsf{rmathbr} after other packages because
 % \textsf{rmathbr} has special support of many math-related packages:
-% \textsf{amsfonts}, \textsf{amssymb}, \textsf{amstex}, \textsf{bm},
+% \textsf{amsfonts}, \textsf{amssymb}, \mbox{\textsf{amstex}}, \textsf{bm},
 % \textsf{boisik}, \textsf{euler}, \textsf{eulervm}, \textsf{fourier},
 % \textsf{icomma}, \textsf{latexsym}, \textsf{lucbmath}, \textsf{lucidabr},
-% \textsf{lucmin}, \textsf{lucmtime}, \textsf{luctime}, \textsf{mathbbol},
+% \textsf{lucmin}, \mbox{\textsf{lucmtime}}, \textsf{luctime}, \textsf{mathbbol},
 % \textsf{mathtools}, \textsf{mdwmath}, \textsf{program}, \textsf{sbbm},
-% \textsf{stmaryrd}, \textsf{wasysym}, \textsf{xy}.
+% \textsf{stmaryrd}, \textsf{unicode-math}, \textsf{wasysym}, \textsf{xy}.
 %
 % Please, submit any found bugs to \url{https://github.com/dryabov/rmathbr/issues}.
 %
@@ -137,7 +139,7 @@
 %         This option declares what way \textsf{rmathbr} will affect |_| and |^|
 %         commands (sub- and superscripts). In the ``noactive'' mode, they have
 %         default \TeX{} behavior, but it may be necessary to manually wrap some
-%         indices into curly brackets, e.g. |A^{\star}| instead of just
+%         indices into curly braces, e.g. |A^{\star}| instead of just
 %         a |A^\star|. In the ``mathactive'' mode, both |_| and |^| become
 %         commands in math mode that process arguments properly, and extra
 %         wrapping is unnecessary. And in the ``active'' mode these commands can
@@ -251,6 +253,11 @@
 %
 % \section{Changelog}
 %
+% \subsection*{1.1.1 (18-December-2020)}
+% \begin{itemize}
+%   \item fix issue with a prime (|'|) followed by a superscript
+%   \item fix issue with \verb|\text| command as sub-/superscripts
+% \end{itemize}
 % \subsection*{1.1 (11-December-2020)}
 % \begin{itemize}
 %   \item add support of XeTeX/LuaTeX and \textsf{unicode-math} package
@@ -357,22 +364,26 @@
 \RequirePackage{ifetex}
 \RequirePackage{ifluatex}
 \RequirePackage{xkeyval}
+\RequirePackage{expl3}
 %    \end{macrocode}
+%
 % \begin{macro}{\rmathbr@kv}
 %    \begin{macrocode}
 \edef\rmathbr@kv{\@currname.\@currext}
 %    \end{macrocode}
 % \end{macro}
+%
 % \begin{macro}{\xDeclareBoolOptionX}
-% The macro to declare boolean option.
+% The macro to declare a boolean option.
 %    \begin{macrocode}
 \def\xDeclareBoolOptionX#1#2{%
   \define@boolkey{\rmathbr@kv}[rmathbr@kv@]{#1}[true]{#2}%
 }
 %    \end{macrocode}
 % \end{macro}
+%
 % \begin{macro}{\xDeclareChoiceOptionX}
-% The macro to declare multi-choice option.
+% The macro to declare a choice option.
 %    \begin{macrocode}
 \def\xDeclareChoiceOptionX#1[#2]#3[#4]#5{%
   \define@choicekey{\rmathbr@kv}{#1}[#2]{#3}[#4]{#5}%
@@ -403,66 +414,77 @@
 \def\SetBreakableRel#1{\rmathbr@setbreakable{#1}{\brokenrel}}
 %    \end{macrocode}
 % \end{macro}
+%
 % \begin{macro}{\SetBreakableBin}
 % Makes breakable binary operation.
 %    \begin{macrocode}
 \def\SetBreakableBin#1{\rmathbr@setbreakable{#1}{\brokenbin}}
 %    \end{macrocode}
 % \end{macro}
+%
 % \begin{macro}{\SetBreakableInner}
 % Makes breakable inner (like \verb|\ldots|).
 %    \begin{macrocode}
 \def\SetBreakableInner#1{\rmathbr@setbreakable{#1}{\brokeninner}}
 %    \end{macrocode}
 % \end{macro}
+%
 % \begin{macro}{\SetOpenBracket}
 % Disables breaks after open bracket.
 %    \begin{macrocode}
 \def\SetOpenBracket#1{\rmathbr@nobrafter{#1}}
 %    \end{macrocode}
 % \end{macro}
+%
 % \begin{macro}{\SetPunctuation}
 % Disables breaks after punctuation sign.
 %    \begin{macrocode}
 \def\SetPunctuation#1{\rmathbr@nobrafter{#1}}
 %    \end{macrocode}
 % \end{macro}
+%
 % \begin{macro}{\SetMathOperator}
 % Disables breaks after math operator.
 %    \begin{macrocode}
 \def\SetMathOperator#1{\rmathbr@setbreakable{#1}{\rmathbr@mathop}}
 %    \end{macrocode}
 % \end{macro}
+%
 % \begin{macro}{\UnsetBrokenCmd}
 % Restores original command.
 %    \begin{macrocode}
 \def\UnsetBrokenCmd#1{\rmathbr@unsetbroken{#1}}
 %    \end{macrocode}
 % \end{macro}
+%
 % \begin{macro}{\BrokenBinOff}
 % Disables break on binary operations.
 %    \begin{macrocode}
 \def\BrokenBinOff{\rmathbr@brokenbinoff}
 %    \end{macrocode}
 % \end{macro}
+%
 % \begin{macro}{\BrokenBinOn}
 % Enables break on binary operations.
 %    \begin{macrocode}
 \def\BrokenBinOn{\rmathbr@brokenbinon}
 %    \end{macrocode}
 % \end{macro}
+%
 % \begin{macro}{\brokenrel}
 % Makes argument as breakable relation sign.
 %    \begin{macrocode}
 \DeclareRobustCommand{\brokenrel}[1]{\rmathbr@brokenrel{#1}}
 %    \end{macrocode}
 % \end{macro}
+%
 % \begin{macro}{\brokenbin}
 % Makes argument as breakable binary operation.
 %    \begin{macrocode}
 \DeclareRobustCommand{\brokenbin}[1]{\rmathbr@brokenbin{#1}}
 %    \end{macrocode}
 % \end{macro}
+%
 % \begin{macro}{\brokeninner}
 % Makes argument as breakable inner.
 %    \begin{macrocode}
@@ -506,17 +528,8 @@
 %
 % Process |script| option:
 %    \begin{macrocode}
-\let\rmathbr@scriptsmode=\@ne
-%    \end{macrocode}
-%    \begin{macrocode}
-\xDeclareChoiceOptionX{scripts}[\val\nr]{noactive,mathactive,active}[mathactive]{
-  \ifcase\nr\relax
-    \let\rmathbr@scriptsmode=\z@
-  \or
-    \let\rmathbr@scriptsmode=\@ne
-  \or
-    \let\rmathbr@scriptsmode=\tw@
-  \fi
+\xDeclareChoiceOptionX{scripts}[\xkv@val\xkv@nr]{noactive,mathactive,active}[mathactive]{
+  \let\rmathbr@kv@scriptsmode=\xkv@nr
 }
 %    \end{macrocode}
 %
@@ -529,8 +542,8 @@
 % Note that by default 'atload' is used unless 'unicode-math' or 'mathtools' are
 % loaded.
 %    \begin{macrocode}
-\xDeclareChoiceOptionX{run}[\val\nr]{atload,atbegindocument,auto}[auto]{
-  \ifcase\nr\relax
+\xDeclareChoiceOptionX{run}[\xkv@val\xkv@nr]{atload,atbegindocument,auto}[auto]{
+  \ifcase\xkv@nr\relax
     \rmathbr@patch@begindocumentfalse
   \or
     \rmathbr@patch@begindocumenttrue
@@ -582,7 +595,7 @@
 %
 % Switch to scripts mode
 %    \begin{macrocode}
-\ifcase\rmathbr@scriptsmode
+\ifcase\rmathbr@kv@scriptsmode
   % nop
 \or
   \AtBeginDocument{\catcode`\^=12\mathcode`\^=32768\catcode`\_=12\mathcode`\_=32768}
@@ -590,8 +603,9 @@
   \AtBeginDocument{\catcode`\^\active\catcode`\_\active}
 \fi
 %    \end{macrocode}
+%
 % \begin{macro}{\rmathbr@pr@m@s}
-%  Fix prime symbol to take into account active math superscripts.
+% Fix the prime symbol to take into account active math superscripts.
 %    \begin{macrocode}
 \def\rmathbr@pr@m@s{%
   \ifx'\@let@token
@@ -608,10 +622,29 @@
 % \end{macro}
 %
 %    \begin{macrocode}
-\ifnum\rmathbr@scriptsmode>0\relax
+\ifnum\rmathbr@kv@scriptsmode>0\relax
   \let\pr@m@s=\rmathbr@pr@m@s
 \fi
 %    \end{macrocode}
+%
+% \begin{macro}{\rmathbr@unicodemath@primes@patch}
+% \begin{macro}{\__um_superscript:n}
+% Fix the prime symbol for unicode-math package.
+%    \begin{macrocode}
+\ExplSyntaxOn
+\def\rmathbr@unicodemath@primes@patch{
+  \cs_gset:Nn \__um_superscript:n
+    {
+      \rmathbr@superscript@std\bgroup ##1
+      \peek_meaning_remove:NTF \rmathbr@superscript@other \__um_arg_i_before_egroup:n {
+        \peek_meaning_remove:NTF \rmathbr@superscript@std \__um_arg_i_before_egroup:n \egroup
+      }
+    }
+}
+\ExplSyntaxOff
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
 %
 % Store original penalty values (via mathchardef trick).
 %    \begin{macrocode}
@@ -633,6 +666,7 @@
 \relpenalty=13131
 \binoppenalty=14141
 %    \end{macrocode}
+%
 % \begin{macro}{\everymath}
 % First symbol/command in equation is nonbreakable.
 %    \begin{macrocode}
@@ -645,21 +679,25 @@
 \begingroup\catcode`\^=7 \global\let\rmathbr@superscript@std=^\endgroup
 %    \end{macrocode}
 % \end{macro}
+%
 % \begin{macro}{\rmathbr@superscript@other}
 %    \begin{macrocode}
 \begingroup\catcode`\^=12\global\let\rmathbr@superscript@other=^\endgroup
 %    \end{macrocode}
 % \end{macro}
+%
 % \begin{macro}{\rmathbr@subscript@std}
 %    \begin{macrocode}
 \begingroup\catcode`\_=8 \global\let\rmathbr@subscript@std=_\endgroup
 %    \end{macrocode}
 % \end{macro}
+%
 % \begin{macro}{\rmathbr@subscript@other}
 %    \begin{macrocode}
 \begingroup\catcode`\_=12\global\let\rmathbr@subscript@other=_\endgroup
 %    \end{macrocode}
 % \end{macro}
+%
 % \begin{macro}{\rmathbr@prime}
 %    \begin{macrocode}
 \begingroup\catcode`\'=12\global\let\rmathbr@prime='\endgroup
@@ -668,12 +706,13 @@
 %
 % \begin{macro}{\rmathbr@superscript}
 %    \begin{macrocode}
-\def\rmathbr@superscript#1{\rmathbr@check@arg\rmathbr@superscript@std{#1}}
+\def\rmathbr@superscript{\rmathbr@check@arg\rmathbr@superscript@std}
 %    \end{macrocode}
 % \end{macro}
+%
 % \begin{macro}{\rmathbr@subscript}
 %    \begin{macrocode}
-\def\rmathbr@subscript#1{\rmathbr@check@arg\rmathbr@subscript@std{#1}}
+\def\rmathbr@subscript{\rmathbr@check@arg\rmathbr@subscript@std}
 %    \end{macrocode}
 % \end{macro}
 %
@@ -681,34 +720,30 @@
 % Check that argument is rmathbr-processed command and wrap it into braces
 % (if necessary)
 %    \begin{macrocode}
-\def\rmathbr@check@arg#1#2{%
-  \rmathbr@split#2\@nil
-  \ifx\rmathbr@tail\empty
-    \edef\rmathbr@str{\expandafter\@gobble\string#2}
-    \ifx\rmathbr@str\empty
-      \let\rmathbr@command=\rmathbr@wrap@arg
-    \else
-      \expandafter\ifx\csname rmathbr@orig@\rmathbr@str\endcsname\relax
+\def\rmathbr@check@arg#1{%
+  \let\rmathbr@checkarg@cmd=#1
+  \futurelet\rmathbr@let@token\rmathbr@check@@arg%
+}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\rmathbr@check@@arg}
+%    \begin{macrocode}
+\def\rmathbr@check@@arg#1{%
+  \let\rmathbr@command=\rmathbr@wrap@arg
+  \ifx\rmathbr@let@token\bgroup\else
+    \edef\rmathbr@orig{\expandafter\@gobble\string#1}
+    \ifx\rmathbr@orig\empty\else
+      \expandafter\ifx\csname rmathbr@orig@\rmathbr@orig\endcsname\relax
         \let\rmathbr@command=\@firstofone
-      \else
-        \let\rmathbr@command=\rmathbr@wrap@arg
       \fi
     \fi
-  \else
-    \let\rmathbr@command=\rmathbr@wrap@arg
   \fi
-  #1\rmathbr@command{#2}%
+  \rmathbr@checkarg@cmd\rmathbr@command{#1}%
 }
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\rmathbr@split}
-%    \begin{macrocode}
-\def\rmathbr@split#1#2\@nil{%
-  \def\rmathbr@head{#1}
-  \def\rmathbr@tail{#2}
-}
-%    \end{macrocode}
-% \end{macro}
+%
 % \begin{macro}{\rmathbr@wrap@arg}
 %    \begin{macrocode}
 \def\rmathbr@wrap@arg#1{{#1}}
@@ -741,11 +776,13 @@
     \fi}
 %    \end{macrocode}
 % \end{macro}
+%
 % \begin{macro}{\rmathbr@mathchar}
 %    \begin{macrocode}
   \def\rmathbr@mathchar#1{\mathchar\number\mathcode#1}
 %    \end{macrocode}
 % \end{macro}
+%
 % \begin{macro}{\rmathbr@makeactivemathopen}
 %    \begin{macrocode}
   \def\rmathbr@makeactivemathopen#1{%
@@ -768,6 +805,7 @@
   \endgroup
 %    \end{macrocode}
 % \end{macro}
+%
 % \begin{macro}{\rmathbr@checkmathchar}
 %    \begin{macrocode}
   \def\rmathbr@checkmathchar#1{%
@@ -778,21 +816,25 @@
     \fi}
 %    \end{macrocode}
 % \end{macro}
+%
 % \begin{macro}{\rmathbr@mathchar}
 %    \begin{macrocode}
   \def\rmathbr@mathchar#1{\Umathcharnum\number\Umathcodenum#1}
 %    \end{macrocode}
 % \end{macro}
+%
 % \begin{macro}{\rmathbr@truncdiv}
 %    \begin{macrocode}
   \def\rmathbr@truncdiv#1#2{((#1-(#2-1)/2)/#2)}
 %    \end{macrocode}
 % \end{macro}
+%
 % \begin{macro}{\rmathbr@modulo}
 %    \begin{macrocode}
   \def\rmathbr@modulo#1#2{(#1-\rmathbr@truncdiv{#1}{#2}*#2)}
 %    \end{macrocode}
 % \end{macro}
+%
 % \begin{macro}{\rmathbr@makeactivemathopen}
 %    \begin{macrocode}
   \def\rmathbr@makeactivemathopen#1{%
@@ -814,6 +856,7 @@
   }
 \fi
 %    \end{macrocode}
+%
 % \begin{macro}{\rmathbr@makeactivemath}
 %    \begin{macrocode}
 \def\rmathbr@makeactivemath#1#2#3{
@@ -831,6 +874,7 @@
 }
 %    \end{macrocode}
 % \end{macro}
+%
 % \begin{macro}{\rmathbr@makeactivemathpunct}
 %    \begin{macrocode}
 \def\rmathbr@makeactivemathpunct#1#2{
@@ -851,22 +895,27 @@
 %    \begin{macrocode}
 \newif\ifrmathbr@protected
 %    \end{macrocode}
+%
+% \begin{macro}{\rmathbr@str@contains}
+%    \begin{macrocode}
+\def\rmathbr@str@contains#1#2{\begingroup\edef\x{\endgroup\noexpand\in@{#1}{#2}}\x}
+%    \end{macrocode}
+% \end{macro}
+%
 % \begin{macro}{\rmathbr@ifprotected}
 %    \begin{macrocode}
 \def\rmathbr@ifprotected#1{%
   \rmathbr@protectedfalse
-  \edef\str@cmd{\string#1\space}
   \edef\meaning@cmd{\meaning#1}
-  \def\str@contains##1##2{\begingroup\edef\x{\endgroup\noexpand\in@{##1}{##2}}\x}
-  \str@contains\str@cmd\meaning@cmd
+  \rmathbr@str@contains{\string#1\space}\meaning@cmd
   \ifin@
-    \str@contains{\string\protect\space}\meaning@cmd
+    \rmathbr@str@contains{\string\protect\space}\meaning@cmd
     \ifin@\rmathbr@protectedtrue\else
-      \str@contains{\string\x@protect\space}\meaning@cmd
+      \rmathbr@str@contains{\string\x@protect\space}\meaning@cmd
       \ifin@\rmathbr@protectedtrue\else
-        \str@contains{\string\@testopt\space}\meaning@cmd
+        \rmathbr@str@contains{\string\@testopt\space}\meaning@cmd
         \ifin@\rmathbr@protectedtrue\else
-          \str@contains{\string\@protected@testopt\space}\meaning@cmd
+          \rmathbr@str@contains{\string\@protected@testopt\space}\meaning@cmd
           \ifin@\rmathbr@protectedtrue\fi
         \fi
       \fi
@@ -875,6 +924,7 @@
 }
 %    \end{macrocode}
 % \end{macro}
+%
 % \begin{macro}{\rmathbr@ReDeclareRobustCommand}
 % Command without arguments
 %    \begin{macrocode}
@@ -908,6 +958,7 @@
 }
 %    \end{macrocode}
 % \end{macro}
+%
 % \begin{macro}{\rmathbr@ReDeclareRobustCommandI}
 % Command with one argument
 %    \begin{macrocode}
@@ -941,16 +992,19 @@
 }
 %    \end{macrocode}
 % \end{macro}
+%
 % \begin{macro}{\brokenrel}
 %    \begin{macrocode}
 \rmathbr@ReDeclareRobustCommandI{\brokenrel}{\rmathbr@brokenrel{#1}}
 %    \end{macrocode}
 % \end{macro}
+%
 % \begin{macro}{\brokenbin}
 %    \begin{macrocode}
 \rmathbr@ReDeclareRobustCommandI{\brokenbin}{\rmathbr@brokenbin{#1}}
 %    \end{macrocode}
 % \end{macro}
+%
 % \begin{macro}{\brokeninner}
 %    \begin{macrocode}
 \rmathbr@ReDeclareRobustCommandI{\brokeninner}{\rmathbr@brokeninner{#1}}%
@@ -962,6 +1016,7 @@
 \let\rmathbr@save@brokenbin=\brokenbin
 \let\rmathbr@save@brokeninner=\brokeninner
 %    \end{macrocode}
+%
 % \begin{macro}{\rmathbr@brokenbinon}
 %    \begin{macrocode}
 \def\rmathbr@brokenbinon{%
@@ -972,6 +1027,7 @@
 }
 %    \end{macrocode}
 % \end{macro}
+%
 % \begin{macro}{\rmathbr@brokenbinoff}
 %    \begin{macrocode}
 \def\rmathbr@brokenbinoff{%
@@ -982,6 +1038,7 @@
 }
 %    \end{macrocode}
 % \end{macro}
+%
 % \begin{macro}{\rmathbr@setbrokens}
 %    \begin{macrocode}
 \def\rmathbr@setbrokens{%
@@ -992,6 +1049,7 @@
 }
 %    \end{macrocode}
 % \end{macro}
+%
 % \begin{macro}{\rmathbr@unsetbrokens}
 %    \begin{macrocode}
 \def\rmathbr@unsetbrokens{%
@@ -1002,6 +1060,7 @@
 }
 %    \end{macrocode}
 % \end{macro}
+%
 % \begin{macro}{\rmathbr@brokenrel}
 %    \begin{macrocode}
 \def\rmathbr@brokenrel#1{%
@@ -1012,6 +1071,7 @@
 }
 %    \end{macrocode}
 % \end{macro}
+%
 % \begin{macro}{\rmathbr@brokenbin}
 %    \begin{macrocode}
 \def\rmathbr@brokenbin#1{%
@@ -1022,6 +1082,7 @@
 }
 %    \end{macrocode}
 % \end{macro}
+%
 % \begin{macro}{\rmathbr@brokeninner}
 %    \begin{macrocode}
 \def\rmathbr@brokeninner#1{%
@@ -1032,6 +1093,7 @@
 }
 %    \end{macrocode}
 % \end{macro}
+%
 % \begin{macro}{\rmathbr@mathop}
 %    \begin{macrocode}
 \def\rmathbr@mathop#1{%
@@ -1042,6 +1104,7 @@
 }
 %    \end{macrocode}
 % \end{macro}
+%
 % \begin{macro}{\rmathbr@@brokenrel}
 % LuaTeX only supports per-disc-node penalties
 %    \begin{macrocode}
@@ -1063,6 +1126,7 @@
 }
 %    \end{macrocode}
 % \end{macro}
+%
 % \begin{macro}{\rmathbr@@brokenbin}
 %    \begin{macrocode}
 \def\rmathbr@@brokenbin#1{%
@@ -1083,6 +1147,7 @@
 }
 %    \end{macrocode}
 % \end{macro}
+%
 % \begin{macro}{\rmathbr@@brokeninner}
 %    \begin{macrocode}
 \def\rmathbr@@brokeninner#1{%
@@ -1103,6 +1168,7 @@
 }
 %    \end{macrocode}
 % \end{macro}
+%
 % \begin{macro}{\rmathbr@@mathop}
 %    \begin{macrocode}
 \def\rmathbr@@mathop#1{%
@@ -1111,6 +1177,7 @@
 }
 %    \end{macrocode}
 % \end{macro}
+%
 % \begin{macro}{\rmathbr@selector}
 %    \begin{macrocode}
 \def\rmathbr@selector#1{%
@@ -1122,6 +1189,7 @@
 }
 %    \end{macrocode}
 % \end{macro}
+%
 % \begin{macro}{\rmathbr@brokenop}
 %    \begin{macrocode}
 \def\rmathbr@brokenop{%
@@ -1153,6 +1221,7 @@
 }
 %    \end{macrocode}
 % \end{macro}
+%
 % \begin{macro}{\rmathbr@brokenglue}
 %    \begin{macrocode}
 \def\rmathbr@brokenglue#1#2#3{%
@@ -1161,6 +1230,7 @@
 }
 %    \end{macrocode}
 % \end{macro}
+%
 % \begin{macro}{\rmathbr@brokenskip}
 %    \begin{macrocode}
 \def\rmathbr@brokenskip#1#2{%
@@ -1188,6 +1258,7 @@
 }
 %    \end{macrocode}
 % \end{macro}
+%
 % \begin{macro}{\rmathbr@nobrafter}
 %    \begin{macrocode}
 \def\rmathbr@nobrafter#1{%
@@ -1204,6 +1275,7 @@
 }
 %    \end{macrocode}
 % \end{macro}
+%
 % \begin{macro}{\rmathbr@unsetbroken}
 %    \begin{macrocode}
 \def\rmathbr@unsetbroken#1{
@@ -1236,21 +1308,25 @@
 \rmathbr@makeactivemath{`\=}{\brokenrel}{\mathchar12349}
 %    \end{macrocode}
 % \end{macro}
+%
 % \begin{macro}{<}
 %    \begin{macrocode}
 \rmathbr@makeactivemath{`\<}{\brokenrel}{\mathchar12604}
 %    \end{macrocode}
 % \end{macro}
+%
 % \begin{macro}{>}
 %    \begin{macrocode}
 \rmathbr@makeactivemath{`\>}{\brokenrel}{\mathchar12606}
 %    \end{macrocode}
 % \end{macro}
+%
 % \begin{macro}{+}
 %    \begin{macrocode}
 \rmathbr@makeactivemath{`\+}{\brokenbin}{\mathchar8235}
 %    \end{macrocode}
 % \end{macro}
+%
 % \begin{macro}{-}
 %    \begin{macrocode}
 \ifrmathbr@kv@brokenminus
@@ -1258,16 +1334,19 @@
 \fi
 %    \end{macrocode}
 % \end{macro}
+%
 % \begin{macro}{*}
 %    \begin{macrocode}
 \rmathbr@makeactivemath{`\*}{\brokenbin}{\mathchar8707}
 %    \end{macrocode}
 % \end{macro}
+%
 % \begin{macro}{(}
 %    \begin{macrocode}
 \rmathbr@makeactivemathopen{`\(}
 %    \end{macrocode}
 % \end{macro}
+%
 % \begin{macro}{[}
 %    \begin{macrocode}
 \rmathbr@makeactivemathopen{`\[}
@@ -1315,12 +1394,14 @@
 \endgroup
 %    \end{macrocode}
 % \end{macro}
+%
 % \begin{macro}{\rmathbr@colontest}
 % Check for \verb|:=|.
 %    \begin{macrocode}
 \def\rmathbr@colontest{\futurelet\rmathbr@let@token\rmathbr@do@colontest}
 %    \end{macrocode}
 % \end{macro}
+%
 % \begin{macro}{\rmathbr@do@colontest}
 %    \begin{macrocode}
 \def\rmathbr@do@colontest{%
@@ -1424,6 +1505,9 @@
     \catcode`\"=12
     \@@input{unicode-math-table.tex}
   \endgroup
+  \ifnum\rmathbr@kv@scriptsmode>0\relax
+    \rmathbr@unicodemath@primes@patch
+  \fi
 }{}
 %    \end{macrocode}
 %
@@ -1524,6 +1608,7 @@
 \SetBreakableBin{\times}
 \SetBreakableBin{\cdot}
 %    \end{macrocode}
+%
 % \begin{macro}{\rmathbr@cdott}
 % \verb|\cdott| is \verb|\cdot| that is changed to \verb|\times| at break point.
 %    \begin{macrocode}
@@ -1535,6 +1620,7 @@
 }
 %    \end{macrocode}
 % \end{macro}
+%
 % \begin{macro}{\cdott}
 %    \begin{macrocode}
 \def\cdott{%
@@ -1558,6 +1644,7 @@
 }
 %    \end{macrocode}
 % \end{macro}
+%
 % \begin{macro}{\cdot}
 %    \begin{macrocode}
 \ifrmathbr@kv@cdottimes
@@ -1565,6 +1652,7 @@
 \fi
 %    \end{macrocode}
 % \end{macro}
+%
 % \begin{macro}{\*}
 %    \begin{macrocode}
 \def\*{\mathbin{}%
@@ -2764,7 +2852,7 @@
 % Patch for \textsf{xy} package:
 %    \begin{macrocode}
 \@ifpackageloaded{xy}{%
-  \ifnum\rmathbr@scriptsmode>0\relax
+  \ifnum\rmathbr@kv@scriptsmode>0\relax
     \let\rmathbr@save@xy=\xy
     \let\rmathbr@save@endxy=\endxy
     \def\xy{\begingroup\catcode`\^7\catcode`\_8\rmathbr@save@xy}
